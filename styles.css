@@ -457,15 +457,15 @@ button {
 }
 
 .item-card.condition {
-  border-color: var(--red);
-  background: #fff7f3;
+  border-color: #7f2f2a;
+  background: linear-gradient(160deg, #ffe2d8 0%, #fff2df 100%);
 }
 
 .item-title {
   font-size: 18px;
   font-weight: 900;
   line-height: 1.05;
-  padding-right: 36px;
+  padding-right: 42px;
   word-break: break-word;
 }
 
@@ -505,6 +505,20 @@ button {
   color: var(--red);
 }
 
+.condition-effect {
+  padding: 8px 4px;
+  color: #61231f;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1.35;
+  text-align: left;
+  align-self: stretch;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
 .item-meta {
   display: flex;
   justify-content: space-between;
@@ -517,14 +531,32 @@ button {
 .damage-badge,
 .armor-badge {
   position: absolute;
-  right: 7px;
-  top: 28px;
+  left: 7px;
+  bottom: 7px;
   border: 1.5px solid var(--line);
   border-radius: 4px;
   padding: 3px 5px;
   background: rgba(255, 252, 245, 0.92);
   font-size: 13px;
   font-weight: 900;
+  z-index: 2;
+}
+
+.usage-count {
+  position: absolute;
+  right: 8px;
+  top: 6px;
+  min-width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper-strong);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1;
 }
 
 .usage-dots {
@@ -545,6 +577,16 @@ button {
 
 .dot.filled {
   background: var(--ink);
+}
+
+.menu-usage-dots {
+  position: absolute;
+  top: 18px;
+  right: 14px;
+  display: flex;
+  gap: 4px;
+  padding-left: 12px;
+  background: var(--paper-strong);
 }
 
 .slot.drag-over {
@@ -864,6 +906,7 @@ button {
   background: var(--paper-strong);
   box-shadow: 5px 5px 0 var(--line), var(--shadow);
   padding: 14px;
+  position: relative;
 }
 
 .bottom-sheet-backdrop {
@@ -879,6 +922,25 @@ button {
 .context-menu h2 {
   margin: 0 0 12px;
   font-size: 22px;
+}
+
+.context-menu h2 {
+  padding-right: 86px;
+}
+
+.modal-close-x {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  border: 1.5px solid var(--line);
+  border-radius: 6px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 900;
+  cursor: pointer;
 }
 
 .form-grid {
@@ -940,13 +1002,59 @@ button {
   color: white;
 }
 
+.context-menu [data-add-item],
+.modal [data-custom] {
+  color: var(--ink);
+}
+
 .danger {
   background: #fff1ed;
   color: var(--red);
 }
 
+.card-effect {
+  margin: 0;
+  border: 1.5px solid var(--line);
+  border-radius: 7px;
+  background: #fffdf7;
+  padding: 12px;
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.45;
+}
+
+.condition-remove {
+  background: #fff3ec;
+  border-color: #7f2f2a;
+}
+
 .actions button {
   flex: 1;
+}
+
+.catalog-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.catalog-tab {
+  flex: 0 0 auto;
+  border: 1.5px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper);
+  color: var(--ink);
+  padding: 8px 14px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.catalog-tab.active {
+  background: var(--ink);
+  color: var(--paper-strong);
 }
 
 .catalog-list {
@@ -961,6 +1069,7 @@ button {
   border: 1.5px solid var(--line);
   border-radius: 7px;
   background: #fffdf7;
+  color: var(--ink);
   padding: 8px;
   display: grid;
   grid-template-columns: 58px 1fr;
@@ -968,6 +1077,7 @@ button {
   align-items: center;
   text-align: left;
   cursor: pointer;
+  position: relative;
 }
 
 .catalog-card:disabled {
@@ -990,16 +1100,52 @@ button {
 .catalog-copy {
   display: grid;
   gap: 3px;
+  color: var(--ink);
 }
 
 .catalog-copy strong {
   font-size: 18px;
+  color: var(--ink);
 }
 
 .catalog-copy small {
-  color: var(--muted);
+  color: var(--ink);
   font-weight: 800;
   line-height: 1.35;
+}
+
+.slot-footprint {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  display: grid;
+  gap: 2px;
+  padding: 3px;
+  border: 1.5px solid var(--line);
+  border-radius: 4px;
+  background: var(--paper-strong);
+  box-shadow: 0 1px 0 rgba(23, 21, 17, 0.16);
+}
+
+.slot-footprint span {
+  width: 9px;
+  height: 9px;
+  border: 1.5px solid var(--line);
+  background: rgba(83, 106, 75, 0.18);
+}
+
+.footprint-1x1 {
+  grid-template-columns: 9px;
+}
+
+.footprint-1x2 {
+  grid-template-columns: 9px;
+  grid-template-rows: repeat(2, 9px);
+}
+
+.footprint-2x1 {
+  grid-template-columns: repeat(2, 9px);
+  grid-template-rows: 9px;
 }
 
 .settings-list,

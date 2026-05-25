@@ -1,4 +1,5 @@
-const STORAGE_KEY = "mausritter-card-app-v1";
+﻿const STORAGE_KEY = "mausritter-card-app-v1";
+const DATABASE_CSV_URL = "https://docs.google.com/spreadsheets/d/1YSE23y_C5d89gnkpGNfNltN0UQ1sMazzDA0W7FweBRI/export?format=csv&gid=0";
 const BASE_MONEY_LIMIT = 250;
 const diceTypes = [6, 8, 10, 20];
 const equipSlots = [
@@ -67,6 +68,7 @@ function makeItem(data) {
     damage: data.damage || "",
     armor: data.armor || "",
     note: data.note || "",
+    category: data.category || "",
     slots: Number(data.slots || 1),
     slotShape: data.slotShape || (Number(data.slots || 1) === 2 ? "1x2" : "1x1"),
     equipRule: data.equipRule || "any",
@@ -75,11 +77,14 @@ function makeItem(data) {
 }
 
 function makeCondition(data) {
+  const detailParts = splitConditionDetail(data.detail || "");
   return {
     id: uid(),
     type: "condition",
     name: data.name || "自訂狀態",
-    detail: data.detail || "移除：",
+    effect: data.effect || detailParts.effect,
+    remove: data.remove || detailParts.remove || "移除：",
+    detail: data.detail || [data.effect, data.remove].filter(Boolean).join("；") || "移除：",
     usageMax: 0,
     usage: 0,
   };
@@ -166,6 +171,7 @@ function normalizeCharacter(character) {
 }
 
 function normalizeCard(card) {
+  if (card.type === "condition") return normalizeCondition(card);
   if (card.type !== "item") return card;
   const preset = itemPresets.find((item) => item.name === card.name);
   if (!preset) {
@@ -183,9 +189,22 @@ function normalizeCard(card) {
     usageMax: Number(preset.usageMax || card.usageMax || 0),
     damage: preset.damage || "",
     armor: preset.armor || "",
+    note: preset.note || card.note || "",
+    category: preset.category || card.category || "",
     slots: Number(preset.slots || 1),
     slotShape: preset.slotShape || (Number(preset.slots || 1) === 2 ? "1x2" : "1x1"),
     equipRule: preset.equipRule || "any",
+  };
+}
+
+function normalizeCondition(card) {
+  const detailParts = splitConditionDetail(card.detail || "");
+  const effectParts = splitConditionDetail(card.effect || "");
+  return {
+    ...card,
+    effect: effectParts.effect || card.effect || detailParts.effect,
+    remove: card.remove || effectParts.remove || detailParts.remove || card.detail || "移除：",
+    detail: card.detail || [card.effect, card.remove].filter(Boolean).join("；") || "移除：",
   };
 }
 
@@ -307,18 +326,17 @@ function renderSlots(character) {
 
 function renderCard(card, slotId) {
   const spanClass = getSpanClass(card, "card");
+  const conditionEffect = card.type === "condition" ? getConditionEffect(card) : "";
   return `
     <article class="item-card ${card.type === "condition" ? "condition" : ""} ${spanClass}" data-card="${card.id}" data-slot-card="${slotId}" data-long-card="${slotId}">
-      <div class="usage-dots">
-        ${Array.from({ length: card.usageMax || 0 }, (_, index) => `<button class="dot ${index < card.usage ? "filled" : ""}" data-dot="${slotId}" data-dot-index="${index}" aria-label="使用點 ${index + 1}"></button>`).join("")}
-      </div>
       <div class="item-title">${escapeHtml(card.name)}</div>
+      ${card.usageMax ? `<div class="usage-count">${Math.max(0, Number(card.usageMax || 0) - Number(card.usage || 0))}</div>` : ""}
       ${card.damage ? `<div class="damage-badge">${escapeHtml(card.damage)}</div>` : ""}
       ${card.armor ? `<div class="armor-badge">${escapeHtml(card.armor)}</div>` : ""}
-      <div class="item-art">${renderCardArt(card)}</div>
+      <div class="item-art">${card.type === "condition" ? `<span class="condition-effect">${escapeHtml(conditionEffect)}</span>` : renderCardArt(card)}</div>
       <div class="item-meta">
-        <span>${escapeHtml(card.kind || (card.type === "condition" ? "狀態" : "物品"))}</span>
-        <span>${escapeHtml(card.note || card.detail || "")}</span>
+        <span></span>
+        <span>${escapeHtml(card.type === "condition" || card.category === "法術" ? "" : (card.note || card.detail || ""))}</span>
       </div>
     </article>
   `;
@@ -413,14 +431,21 @@ function bindEvents() {
   app.querySelector("[data-long='level']").addEventListener("click", openXpSheet);
 
   app.querySelectorAll("[data-long-card]").forEach((card) => {
-    bindLongPress(card, () => openCardMenu(card.dataset.longCard));
+    card.addEventListener("click", (event) => {
+      if (card.dataset.suppressTap === "true") {
+        event.stopPropagation();
+        return;
+      }
+      event.stopPropagation();
+      openCardMenu(card.dataset.longCard);
+    });
     bindTouchDrag(card);
   });
 
   app.querySelectorAll(".slot").forEach((slot) => {
     const slotId = slot.dataset.slot;
     if (!activeCharacter().slots[slotId]) {
-      bindLongPress(slot, () => openEmptySlotMenu(slotId));
+      slot.addEventListener("click", () => openEmptySlotMenu(slotId));
     }
     slot.addEventListener("dragover", (event) => {
       event.preventDefault();
@@ -556,6 +581,7 @@ function startTouchDrag(cardElement, fromSlot, x, y) {
   document.body.appendChild(ghost);
   touchDrag = {
     fromSlot,
+    sourceElement: cardElement,
     ghost,
     offsetX: x - rect.left,
     offsetY: y - rect.top,
@@ -643,6 +669,13 @@ function cancelTouchDrag() {
 }
 
 function cleanupTouchDrag() {
+  if (touchDrag?.sourceElement) {
+    const sourceElement = touchDrag.sourceElement;
+    sourceElement.dataset.suppressTap = "true";
+    window.setTimeout(() => {
+      delete sourceElement.dataset.suppressTap;
+    }, 300);
+  }
   touchDrag?.ghost?.remove();
   touchDrag = null;
   clearPendingDrag();
@@ -846,6 +879,19 @@ function placeDisplacedCardAtIndex(character, displaced, index, fromRoot, source
   return false;
 }
 
+function placePackDisplacedCards(character, displaced, index) {
+  if (index >= displaced.length) return true;
+  const { card } = displaced[index];
+  for (const slot of packSlots) {
+    const snapshot = cloneSlots(character.slots);
+    if (placeCard(character, slot.id, card) && placePackDisplacedCards(character, displaced, index + 1)) {
+      return true;
+    }
+    character.slots = snapshot;
+  }
+  return false;
+}
+
 function getSwapCandidateSlots(card, fromRoot, sourceSlots, originalOrigin) {
   const pageSlots = fromRoot.startsWith("pack") ? packSlots : equipSlots;
   return unique([
@@ -872,18 +918,43 @@ function clearSlotLinks(character, slotId) {
 }
 
 function placeCard(character, slotId, card) {
-  const targetSlots = getTargetSlots(slotId, card);
+  const placement = getTargetPlacement(slotId, card);
+  const targetSlots = placement.slots;
   if (!targetSlots.length || !areSlotsAvailable(character, targetSlots)) return false;
-  character.slots[targetSlots[0]] = card;
+  character.slots[targetSlots[0]] = { ...card, placedShape: placement.shape || getSlotShape(card) };
   targetSlots.slice(1).forEach((linkedSlot) => {
     character.slots[linkedSlot] = { type: "linked", parent: card.id };
   });
   return true;
 }
 
-function canPlaceCard(character, slotId, card) {
+function placeCardWithAutoArrange(character, slotId, card) {
+  if (placeCard(character, slotId, card)) return true;
+  if (!slotId.startsWith("pack")) return false;
+
   const targetSlots = getTargetSlots(slotId, card);
+  if (!targetSlots.length) return false;
+
+  const snapshot = cloneSlots(character.slots);
+  const displaced = getDisplacedCards(character, targetSlots);
+  displaced.forEach(({ origin }) => removeCardAt(character, origin));
+
+  if (!placeCard(character, targetSlots[0], card) || !placePackDisplacedCards(character, displaced, 0)) {
+    character.slots = snapshot;
+    return false;
+  }
+
+  return true;
+}
+
+function canPlaceCard(character, slotId, card) {
+  const targetSlots = getTargetPlacement(slotId, card).slots;
   return !!targetSlots.length && areSlotsAvailable(character, targetSlots);
+}
+
+function canPlaceCardWithAutoArrange(character, slotId, card) {
+  const testCharacter = { ...character, slots: cloneSlots(character.slots) };
+  return placeCardWithAutoArrange(testCharacter, slotId, { ...card });
 }
 
 function areSlotsAvailable(character, slotIds) {
@@ -896,27 +967,38 @@ function findFirstFittingSlot(character, card, originalSlotId) {
 }
 
 function getTargetSlots(slotId, card) {
-  const slot = getSlotInfo(slotId);
-  if (!slot) return [];
-  if (slot.region !== "pack") return getEquipmentTargetSlots(slot, card);
-  return getPackTargetSlots(slot, card);
+  return getTargetPlacement(slotId, card).slots;
 }
 
-function getPackTargetSlots(slot, card) {
-  if (Number(card.slots || 1) === 1) return [slot.id];
+function getTargetPlacement(slotId, card) {
+  const slot = getSlotInfo(slotId);
+  if (!slot) return { slots: [], shape: getSlotShape(card) };
+  if (slot.region !== "pack") {
+    const slots = getEquipmentTargetSlots(slot, card);
+    return { slots, shape: getShapeFromSlots(slots) || getSlotShape(card) };
+  }
+  return getPackTargetPlacement(slot, card);
+}
+
+function getPackTargetPlacement(slot, card) {
+  if (Number(card.slots || 1) === 1) return { slots: [slot.id], shape: "1x1" };
+  const shape = getBaseSlotShape(card);
   const candidates = packSlots
-    .map((candidate) => getGridTargetSlots(packSlots, candidate, card))
-    .filter((targetSlots) => targetSlots.includes(slot.id));
-  const direct = candidates.find((targetSlots) => targetSlots[0] === slot.id);
+    .map((candidate) => ({
+      slots: getGridTargetSlots(packSlots, candidate, card, shape),
+      shape,
+    }))
+    .filter((placement) => placement.slots.includes(slot.id));
+  const direct = candidates.find((placement) => placement.slots[0] === slot.id);
   if (direct) return direct;
   return candidates
     .sort((a, b) => {
-      const aStart = getSlotInfo(a[0]);
-      const bStart = getSlotInfo(b[0]);
+      const aStart = getSlotInfo(a.slots[0]);
+      const bStart = getSlotInfo(b.slots[0]);
       const aDistance = Math.abs(aStart.row - slot.row) + Math.abs(aStart.col - slot.col);
       const bDistance = Math.abs(bStart.row - slot.row) + Math.abs(bStart.col - slot.col);
       return aDistance - bDistance;
-    })[0] || [];
+    })[0] || { slots: [], shape: getSlotShape(card) };
 }
 
 function getEquipmentTargetSlots(slot, card) {
@@ -945,8 +1027,8 @@ function getEquipmentTargetSlots(slot, card) {
   return targetSlots.length && isEquipmentTargetAllowed(targetSlots, rule) ? targetSlots : [];
 }
 
-function getGridTargetSlots(pageSlots, startSlot, card) {
-  const shape = getShapeSize(card);
+function getGridTargetSlots(pageSlots, startSlot, card, shapeOverride) {
+  const shape = getShapeSize(card, shapeOverride);
   const targetSlots = [];
   for (let row = startSlot.row; row < startSlot.row + shape.height; row += 1) {
     for (let col = startSlot.col; col < startSlot.col + shape.width; col += 1) {
@@ -968,16 +1050,28 @@ function isEquipmentTargetAllowed(slotIds, rule) {
   return true;
 }
 
-function getShapeSize(card) {
-  const shape = getSlotShape(card);
+function getShapeSize(card, shapeOverride) {
+  const shape = shapeOverride || getSlotShape(card);
   if (Number(card.slots || 1) !== 2) return { width: 1, height: 1 };
   return shape === "2x1" ? { width: 2, height: 1 } : { width: 1, height: 2 };
 }
 
 function getSlotShape(card) {
+  if (card.placedShape) return card.placedShape;
+  return getBaseSlotShape(card);
+}
+
+function getBaseSlotShape(card) {
   if (card.slotShape) return card.slotShape;
   if (card.slotGroup === "paws" || card.slotGroup === "body") return "1x2";
   return Number(card.slots || 1) === 2 ? "1x2" : "1x1";
+}
+
+function getShapeFromSlots(slotIds) {
+  if (slotIds.length !== 2) return slotIds.length === 1 ? "1x1" : "";
+  const [first, second] = slotIds.map(getSlotInfo);
+  if (!first || !second) return "";
+  return first.row === second.row ? "2x1" : "1x2";
 }
 
 function getEquipRule(card) {
@@ -993,7 +1087,7 @@ function getSlotInfo(slotId) {
 
 function openEmptySlotMenu(slotId) {
   const isPack = slotId.startsWith("pack");
-  openContext("空格", `
+  openContext("", `
     <button class="primary" data-add-item>新增物品</button>
     ${isPack ? `<button class="secondary" data-add-condition>新增狀態</button>` : ""}
   `, (menu) => {
@@ -1010,9 +1104,26 @@ function openEmptySlotMenu(slotId) {
 
 function openCardMenu(slotId) {
   const card = activeCharacter().slots[slotId];
+  const effect = card.category === "法術" ? card.note : "";
+  const removeText = card.type === "condition" ? getConditionRemove(card) : "";
   openContext(card.name, `
+    ${renderMenuUsageDots(card, slotId)}
+    ${effect ? `<p class="card-effect">${escapeHtml(effect)}</p>` : ""}
+    ${removeText ? `<p class="card-effect condition-remove">${escapeHtml(removeText)}</p>` : ""}
     <button class="danger" data-delete>刪除</button>
   `, (menu) => {
+    menu.querySelectorAll("[data-menu-dot]").forEach((dot) => {
+      dot.addEventListener("click", (event) => {
+        event.stopPropagation();
+        const index = Number(dot.dataset.menuDotIndex);
+        updateCharacter((character) => {
+          const target = character.slots[slotId];
+          target.usage = index < target.usage ? index : index + 1;
+        });
+        const updated = activeCharacter().slots[slotId];
+        syncMenuUsageDots(menu, Number(updated?.usage || 0));
+      });
+    });
     menu.querySelector("[data-delete]").addEventListener("click", () => {
       closeContext();
       updateCharacter((character) => {
@@ -1023,13 +1134,34 @@ function openCardMenu(slotId) {
   });
 }
 
+function getConditionEffect(card) {
+  return splitConditionDetail(card.effect || card.detail || "").effect;
+}
+
+function getConditionRemove(card) {
+  const parts = splitConditionDetail(card.remove || card.effect || card.detail || "");
+  return parts.remove || card.remove || "";
+}
+
+function renderMenuUsageDots(card, slotId) {
+  if (!card.usageMax) return "";
+  return `<div class="menu-usage-dots" aria-label="使用點">
+    ${Array.from({ length: card.usageMax || 0 }, (_, index) => `<button class="dot ${index < card.usage ? "filled" : ""}" data-menu-dot="${slotId}" data-menu-dot-index="${index}" aria-label="使用點 ${index + 1}"></button>`).join("")}
+  </div>`;
+}
+
+function syncMenuUsageDots(menu, usage) {
+  menu.querySelectorAll("[data-menu-dot]").forEach((dot) => {
+    dot.classList.toggle("filled", Number(dot.dataset.menuDotIndex) < usage);
+  });
+}
+
 function openContext(title, body, binder) {
   const backdrop = document.createElement("div");
   backdrop.className = "context-backdrop";
-  backdrop.innerHTML = `<div class="context-menu"><h2>${escapeHtml(title)}</h2><div class="settings-list">${body}</div><div class="actions"><button class="secondary" data-close>取消</button></div></div>`;
+  backdrop.innerHTML = `<div class="context-menu">${title ? `<h2>${escapeHtml(title)}</h2>` : ""}<div class="settings-list">${body}</div></div>`;
   document.body.appendChild(backdrop);
   const menu = backdrop.querySelector(".context-menu");
-  backdrop.querySelector("[data-close]").addEventListener("click", closeContext);
   backdrop.addEventListener("click", (event) => {
     if (event.target === backdrop) closeContext();
   });
@@ -1060,7 +1192,7 @@ function openIdentityModal() {
       <label class="field">名字<input data-name value="${escapeAttr(character.name)}"></label>
       <label class="field">出身<input data-origin value="${escapeAttr(character.origin)}"></label>
     </div>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-save>儲存</button></div>
+    <div class="actions"><button class="primary" data-save>儲存</button></div>
   `, (modal, close) => {
     modal.querySelector("[data-save]").addEventListener("click", () => {
       updateCharacter((target) => {
@@ -1075,7 +1207,7 @@ function openIdentityModal() {
 function openNumberModal(title, current, onSave) {
   openModal(title, `
     <label class="field">數值<input data-value type="number" min="0" value="${current}"></label>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-save>儲存</button></div>
+    <div class="actions"><button class="primary" data-save>儲存</button></div>
   `, (modal, close) => {
     modal.querySelector("[data-save]").addEventListener("click", () => {
       onSave(Number(modal.querySelector("[data-value]").value || 0));
@@ -1088,7 +1220,7 @@ function openNotesModal() {
   const character = activeCharacter();
   openModal("筆記", `
     <textarea class="notes-editor" data-notes-edit rows="8" placeholder="記下傷口、約定、欠債或奇怪的夢。">${escapeHtml(character.notes)}</textarea>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-save>儲存</button></div>
+    <div class="actions"><button class="primary" data-save>儲存</button></div>
   `, (modal, close) => {
     modal.querySelector("[data-save]").addEventListener("click", () => {
       updateCharacter((target) => {
@@ -1107,7 +1239,7 @@ function openXpSheet() {
       <label class="field">經驗值<input data-xp-edit type="number" min="0" value="${character.xp}"></label>
       <input class="xp-input" type="range" min="0" max="99" value="${character.xp}" data-xp-range>
     </div>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-save>儲存</button></div>
+    <div class="actions"><button class="primary" data-save>儲存</button></div>
   `, (sheet, close) => {
     const xpInput = sheet.querySelector("[data-xp-edit]");
     const xpRange = sheet.querySelector("[data-xp-range]");
@@ -1131,7 +1263,7 @@ function openHpSheet() {
       <label class="field">最大生命值<input data-hp-max-edit type="number" min="0" value="${character.hp.max}"></label>
       <label class="field">目前生命值<input data-hp-current-edit type="number" min="0" value="${character.hp.current}"></label>
     </div>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-save>儲存</button></div>
+    <div class="actions"><button class="primary" data-save>儲存</button></div>
   `, (sheet, close) => {
     sheet.querySelector("[data-save]").addEventListener("click", () => {
       updateCharacter((target) => {
@@ -1150,7 +1282,7 @@ function openMoneySheet() {
   openBottomSheet("金錢", `
     <label class="field">目前金錢<input data-money-edit type="number" min="0" max="${maxMoney}" value="${Number(character.money || 0)}"></label>
     <p class="field-hint">上限：${maxMoney}</p>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-save>儲存</button></div>
+    <div class="actions"><button class="primary" data-save>儲存</button></div>
   `, (sheet, close) => {
     sheet.querySelector("[data-save]").addEventListener("click", () => {
       updateCharacter((target) => {
@@ -1168,7 +1300,7 @@ function openStatSheet(key) {
       <label class="field">最大值<input data-stat-max-edit type="number" min="0" value="${stat.max}"></label>
       <label class="field">目前值<input data-stat-current-edit type="number" min="0" value="${stat.current}"></label>
     </div>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-save>儲存</button></div>
+    <div class="actions"><button class="primary" data-save>儲存</button></div>
   `, (sheet, close) => {
     sheet.querySelector("[data-save]").addEventListener("click", () => {
       updateCharacter((target) => {
@@ -1197,19 +1329,36 @@ function openBottomSheet(title, body, binder) {
 
 function openItemModal(slotId) {
   const character = activeCharacter();
+  const categories = getItemCategories();
+  const firstCategory = categories[0] || "物品";
   openModal("新增物品", `
-    <div class="catalog-list">
-      ${itemPresets.map((item, index) => renderCatalogButton(item, index, slotId, character)).join("")}
+    <button class="modal-close-x" data-close-item-modal aria-label="關閉">X</button>
+    <div class="catalog-tabs">
+      ${categories.map((category) => `<button class="catalog-tab ${category === firstCategory ? "active" : ""}" data-catalog-category="${escapeAttr(category)}">${escapeHtml(category)}</button>`).join("")}
     </div>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-custom>自訂物品</button></div>
+    <div class="catalog-list" data-catalog-list>
+      ${renderCatalogList(firstCategory, slotId, character)}
+    </div>
+    <div class="actions"><button class="primary" data-custom>自訂物品</button></div>
   `, (modal, close) => {
-    modal.querySelectorAll("[data-pick-item]").forEach((button) => {
-      button.addEventListener("click", () => {
-        const item = itemPresets[Number(button.dataset.pickItem)];
-        updateCharacter((character) => {
-          placeCard(character, slotId, makeItem(item));
+    modal.querySelector("[data-close-item-modal]").addEventListener("click", close);
+    const bindPickButtons = () => {
+      modal.querySelectorAll("[data-pick-item]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const item = itemPresets[Number(button.dataset.pickItem)];
+          updateCharacter((character) => {
+            placeCardWithAutoArrange(character, slotId, makeItem(item));
+          });
+          close();
         });
-        close();
+      });
+    };
+    bindPickButtons();
+    modal.querySelectorAll("[data-catalog-category]").forEach((button) => {
+      button.addEventListener("click", () => {
+        modal.querySelectorAll("[data-catalog-category]").forEach((tab) => tab.classList.toggle("active", tab === button));
+        modal.querySelector("[data-catalog-list]").innerHTML = renderCatalogList(button.dataset.catalogCategory, slotId, activeCharacter());
+        bindPickButtons();
       });
     });
     modal.querySelector("[data-custom]").addEventListener("click", () => {
@@ -1219,43 +1368,86 @@ function openItemModal(slotId) {
   });
 }
 
+function getItemCategories() {
+  return unique(itemPresets.map((item) => getItemCategory(item)));
+}
+
+function getItemCategory(item) {
+  return item.category || "物品";
+}
+
+function renderCatalogList(category, slotId, character) {
+  return itemPresets
+    .map((item, index) => ({ item, index }))
+    .filter(({ item }) => getItemCategory(item) === category)
+    .map(({ item, index }) => renderCatalogButton(item, index, slotId, character))
+    .join("");
+}
+
 function renderCatalogButton(item, index, slotId, character) {
-  const spanText = item.slots === 2 ? "占2格" : "占1格";
-  const disabled = canPlaceCard(character, slotId, { ...item, slots: Number(item.slots || 1) }) ? "" : "disabled";
+  const disabled = canPlaceCardWithAutoArrange(character, slotId, { ...item, slots: Number(item.slots || 1) }) ? "" : "disabled";
   const disabledText = disabled ? " · 目前放不下" : "";
-  const meta = [item.kind, item.damage, item.armor, item.note, spanText].filter(Boolean).join(" · ");
+  const category = getItemCategory(item);
+  const shouldShowMeta = !["物品", "法術"].includes(category);
+  const meta = shouldShowMeta ? [item.kind, item.damage, item.armor, item.note].filter(Boolean).join(" · ") : "";
+  const detail = [meta, disabled ? "目前放不下" : ""].filter(Boolean).join(" · ");
   return `
     <button class="catalog-card" data-pick-item="${index}" ${disabled}>
+      ${renderSlotFootprint(item)}
       <span class="catalog-art">${renderCardArt(item)}</span>
-      <span class="catalog-copy"><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(meta + disabledText)}</small></span>
+      <span class="catalog-copy"><strong>${escapeHtml(item.name)}</strong>${detail ? `<small>${escapeHtml(detail)}</small>` : ""}</span>
     </button>
   `;
 }
 
+function renderSlotFootprint(item) {
+  const slots = Number(item.slots || 1);
+  const shape = slots === 2 ? getBaseSlotShape(item) : "1x1";
+  return `<span class="slot-footprint footprint-${shape}" aria-label="${slots}格">
+    <span></span>
+    ${slots === 2 ? "<span></span>" : ""}
+  </span>`;
+}
+
 function openCustomItemModal(slotId) {
+  const categories = getItemCategories();
   openModal("自訂物品", `
     <div class="form-grid">
       <label class="field">名稱<input data-name value="新物品"></label>
-      <label class="field">類型<input data-kind value="物品"></label>
-      <label class="field">使用點<input data-usage-max type="number" min="0" max="6" value="3"></label>
+      <label class="field">類別<select data-category>
+        ${unique([...categories, "戰鬥", "物品", "法術"]).map((category) => `<option value="${escapeAttr(category)}">${escapeHtml(category)}</option>`).join("")}
+      </select></label>
+      <label class="field">屬性<input data-kind placeholder="例如 輕型、重型遠程、彈藥"></label>
+      <label class="field">usage<input data-usage-max type="number" min="0" max="6" value="3"></label>
       <label class="field">占用格數<select data-slots><option value="1">1 格</option><option value="2">2 格</option></select></label>
-      <label class="field">傷害骰<input data-damage placeholder="例如 d6 或 d6/d8"></label>
-      <label class="field">護甲<input data-armor placeholder="例如 1護甲"></label>
-      <label class="field">備註<input data-note></label>
+      <label class="field">格子排法<select data-slot-shape><option value="">自動</option><option value="1x2">1x2 直向</option><option value="2x1">2x1 橫向</option></select></label>
+      <label class="field">部位限定<select data-equip-rule>
+        <option value="any">不限</option>
+        <option value="paw">爪</option>
+        <option value="twoPaws">兩爪</option>
+        <option value="body">身體</option>
+        <option value="bodyPaw">身體+爪</option>
+      </select></label>
+      <label class="field">骰子<input data-damage placeholder="例如 d6 或 d6/d8"></label>
+      <label class="field">護甲值<input data-armor placeholder="例如 1"></label>
+      <label class="field">效果<textarea data-note rows="3"></textarea></label>
     </div>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-save>新增</button></div>
+    <div class="actions"><button class="primary" data-save>新增</button></div>
   `, (modal, close) => {
     modal.querySelector("[data-save]").addEventListener("click", () => {
       updateCharacter((character) => {
-        placeCard(character, slotId, makeItem({
+        placeCardWithAutoArrange(character, slotId, makeItem({
           name: modal.querySelector("[data-name]").value,
           kind: modal.querySelector("[data-kind]").value,
           icon: "blank",
           usageMax: modal.querySelector("[data-usage-max]").value,
           slots: modal.querySelector("[data-slots]").value,
+          slotShape: normalizeSlotShape(modal.querySelector("[data-slot-shape]").value),
+          equipRule: normalizeEquipRule(modal.querySelector("[data-equip-rule]").value),
           damage: modal.querySelector("[data-damage]").value,
-          armor: modal.querySelector("[data-armor]").value,
+          armor: normalizeArmor(modal.querySelector("[data-armor]").value),
           note: modal.querySelector("[data-note]").value,
+          category: modal.querySelector("[data-category]").value,
         }));
       });
       close();
@@ -1269,11 +1461,11 @@ function openConditionModal(slotId) {
       ${conditionPresets.map((condition, index) => `
         <button class="catalog-card condition-pick" data-pick-condition="${index}">
           <span class="catalog-art">${renderCardArt({ type: "condition" })}</span>
-          <span class="catalog-copy"><strong>${escapeHtml(condition.name)}</strong><small>${escapeHtml(condition.detail)}</small></span>
+          <span class="catalog-copy"><strong>${escapeHtml(condition.name)}</strong>${getConditionEffect(condition) ? `<small>${escapeHtml(getConditionEffect(condition))}</small>` : ""}</span>
         </button>
       `).join("")}
     </div>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-custom>自訂狀態</button></div>
+    <div class="actions"><button class="primary" data-custom>自訂狀態</button></div>
   `, (modal, close) => {
     modal.querySelectorAll("[data-pick-condition]").forEach((button) => {
       button.addEventListener("click", () => {
@@ -1295,15 +1487,17 @@ function openCustomConditionModal(slotId) {
   openModal("自訂狀態", `
     <div class="form-grid">
       <label class="field">名稱<input data-name value="自訂狀態"></label>
-      <label class="field">說明<textarea data-detail>移除：</textarea></label>
+      <label class="field">效果<textarea data-effect rows="3" placeholder="卡片上顯示的效果"></textarea></label>
+      <label class="field">移除條件<textarea data-remove rows="2" placeholder="例如 移除：短休之後"></textarea></label>
     </div>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-save>新增</button></div>
+    <div class="actions"><button class="primary" data-save>新增</button></div>
   `, (modal, close) => {
     modal.querySelector("[data-save]").addEventListener("click", () => {
       updateCharacter((character) => {
         placeCard(character, slotId, makeCondition({
           name: modal.querySelector("[data-name]").value,
-          detail: modal.querySelector("[data-detail]").value,
+          effect: modal.querySelector("[data-effect]").value,
+          remove: modal.querySelector("[data-remove]").value,
         }));
       });
       close();
@@ -1317,7 +1511,7 @@ function openSettings() {
       <button data-characters>角色</button>
       <button data-import>輸入種子碼</button>
     </div>
-    <div class="actions"><button class="secondary" data-cancel>關閉</button></div>
+    <div class="actions"></div>
   `, (modal, close) => {
     modal.querySelector("[data-characters]").addEventListener("click", () => {
       close();
@@ -1343,7 +1537,7 @@ function openCharactersModal() {
       `).join("")}
     </div>
     <div class="actions">
-      <button class="secondary" data-cancel>關閉</button>
+      
       <button class="secondary" data-export>匯出種子碼</button>
       <button class="primary" data-new>新增角色</button>
     </div>
@@ -1400,7 +1594,7 @@ function openCharactersModal() {
 function openImportModal() {
   openModal("輸入種子碼", `
     <label class="field">種子碼<textarea data-seed rows="7"></textarea></label>
-    <div class="actions"><button class="secondary" data-cancel>取消</button><button class="primary" data-save>匯入</button></div>
+    <div class="actions"><button class="primary" data-save>匯入</button></div>
   `, (modal, close) => {
     modal.querySelector("[data-save]").addEventListener("click", () => {
       try {
@@ -1445,4 +1639,155 @@ function escapeAttr(value) {
   return escapeHtml(value);
 }
 
-render();
+async function loadDatabasePresets() {
+  try {
+    const response = await fetch(`${DATABASE_CSV_URL}&cacheBust=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) throw new Error(`Sheet request failed: ${response.status}`);
+    const rows = parseCsv(await response.text());
+    const records = csvRowsToRecords(rows);
+    const nextItems = [];
+    const nextConditions = [];
+
+    records.forEach((record) => {
+      const type = getRecordValue(record, ["databaseType", "資料類型", "卡片類型", "type"]).toLowerCase();
+      const name = getRecordValue(record, ["name", "名稱", "名字", "物品", "狀態"]);
+      if (!name) return;
+      const category = getRecordValue(record, ["category", "類別"]);
+      const looksLikeCondition = ["condition", "status", "狀態", "狀態卡"].includes(type)
+        || ["condition", "status", "狀態", "狀態卡"].includes(category.toLowerCase());
+
+      if (looksLikeCondition) {
+        const detail = getRecordValue(record, ["detail", "說明", "描述"]);
+        nextConditions.push({
+          name,
+          effect: getRecordValue(record, ["effect", "效果"]) || splitConditionDetail(detail).effect,
+          remove: getRecordValue(record, ["remove", "移除", "移除條件"]) || splitConditionDetail(detail).remove,
+          detail,
+        });
+        return;
+      }
+
+      if (!type || ["item", "物品", "物品卡", "weapon", "armor", "gear", "equipment", "裝備"].includes(type)) {
+        nextItems.push({
+          name,
+          kind: getRecordValue(record, ["kind", "屬性", "物品類型", "分類"]) || "物品",
+          icon: getRecordValue(record, ["icon", "圖示", "素材", "圖片"]) || "blank",
+          usageMax: Number(getRecordValue(record, ["usageMax", "usage", "使用點", "使用次數", "點數"]) || 0),
+          damage: getRecordValue(record, ["damage", "骰子", "傷害", "傷害骰"]),
+          armor: normalizeArmor(getRecordValue(record, ["armor", "護甲值", "護甲"])),
+          slots: Number(getRecordValue(record, ["slots", "占用格數", "格數", "占格"]) || 1),
+          slotShape: normalizeSlotShape(getRecordValue(record, ["slotShape", "格子排法", "形狀", "方向", "占用方向"])),
+          equipRule: normalizeEquipRule(getRecordValue(record, ["equipRule", "部位限定", "裝備規則", "部位"])),
+          note: getRecordValue(record, ["note", "備註", "效果", "上限"]),
+          category: category || "物品",
+        });
+      }
+    });
+
+    if (nextItems.length) itemPresets.splice(0, itemPresets.length, ...nextItems);
+    if (nextConditions.length) conditionPresets.splice(0, conditionPresets.length, ...nextConditions);
+  } catch {
+    // Keep bundled data when the sheet is private, offline, or not published yet.
+  }
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let value = "";
+  let quoted = false;
+
+  for (let index = 0; index < text.length; index += 1) {
+    const char = text[index];
+    const next = text[index + 1];
+    if (quoted) {
+      if (char === '"' && next === '"') {
+        value += '"';
+        index += 1;
+      } else if (char === '"') {
+        quoted = false;
+      } else {
+        value += char;
+      }
+    } else if (char === '"') {
+      quoted = true;
+    } else if (char === ",") {
+      row.push(value);
+      value = "";
+    } else if (char === "\n") {
+      row.push(value);
+      rows.push(row);
+      row = [];
+      value = "";
+    } else if (char !== "\r") {
+      value += char;
+    }
+  }
+
+  row.push(value);
+  rows.push(row);
+  return rows.filter((cells) => cells.some((cell) => cell.trim()));
+}
+
+function csvRowsToRecords(rows) {
+  const headers = rows[0]?.map((header) => header.trim()) || [];
+  return rows.slice(1).map((cells) => Object.fromEntries(headers.map((header, index) => [header, (cells[index] || "").trim()])));
+}
+
+function getRecordValue(record, keys) {
+  const normalizedKeys = keys.map(normalizeHeader);
+  const entry = Object.entries(record).find(([key]) => normalizedKeys.includes(normalizeHeader(key)));
+  return entry?.[1]?.trim?.() || "";
+}
+
+function normalizeHeader(value) {
+  return String(value || "").trim().replace(/\s+/g, "").toLowerCase();
+}
+
+function normalizeSlotShape(value) {
+  const shape = String(value || "").trim().toLowerCase();
+  if (["2x1", "橫", "橫向", "horizontal"].includes(shape)) return "2x1";
+  if (["1x2", "直", "直向", "vertical"].includes(shape)) return "1x2";
+  return "";
+}
+
+function normalizeArmor(value) {
+  const armor = String(value || "").trim();
+  if (!armor) return "";
+  return armor.includes("護甲") ? armor : `${armor}護甲`;
+}
+
+function normalizeEquipRule(value) {
+  const rule = String(value || "").trim();
+  const map = {
+    主副爪: "twoPaws",
+    雙爪: "twoPaws",
+    兩爪: "twoPaws",
+    爪: "paw",
+    手: "paw",
+    身體: "body",
+    身體加爪: "bodyPaw",
+    身體爪: "bodyPaw",
+    "身體+爪": "bodyPaw",
+  };
+  return map[rule] || rule || "any";
+}
+
+function splitConditionDetail(detail) {
+  const text = String(detail || "").trim();
+  if (!text) return { effect: "", remove: "" };
+  const removeIndex = text.indexOf("移除");
+  if (removeIndex < 0) return { effect: text, remove: "" };
+  if (removeIndex === 0) return { effect: "", remove: text };
+  return {
+    effect: text.slice(0, removeIndex).replace(/[；;。\s]+$/, "").trim(),
+    remove: text.slice(removeIndex).trim(),
+  };
+}
+
+async function bootstrap() {
+  await loadDatabasePresets();
+  render();
+}
+
+bootstrap();
