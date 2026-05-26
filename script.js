@@ -247,7 +247,6 @@ function render() {
   const character = activeCharacter();
   normalizeCharacter(character);
   saveState();
-  const maxMoney = moneyLimit(character);
   app.innerHTML = `
     <section class="layout-grid">
       <div class="top-layout">
@@ -294,7 +293,7 @@ function render() {
           <div class="money-panel stat-money">
             <div class="money-label">金錢</div>
             <button class="money-summary" data-action="money-sheet">
-              <span>${Number(character.money || 0)}</span><span class="money-cap">/${maxMoney}</span>
+              <span>${Number(character.money || 0)}</span>
             </button>
           </div>
         </div>
@@ -302,23 +301,28 @@ function render() {
       <section class="inventory-panel" data-swipe>
         <div class="tabs">
           <button class="tab ${state.activePage === "equipment" ? "active" : ""}" data-page="equipment">裝備</button>
-          <button class="tab ${state.activePage === "pack" ? "active" : ""}" data-page="pack">背包</button>
+        <button class="tab ${state.activePage === "pack" ? "active" : ""}" data-page="pack">背包</button>
         </div>
         ${renderSlots(character)}
       </section>
-      <div class="utility-row">
-        <div class="grit-panel">
-          <div class="grit-title"><span>堅韌</span>${character.level < 2 ? `<span class="grit-locked">2等級開啟</span>` : ""}</div>
-          <div class="grit-dots">
-            ${renderGrit(character)}
-          </div>
-        </div>
-        <button class="notes-button" data-action="notes">筆記</button>
-      </div>
+      ${renderUtilityRow(character)}
     </section>
     ${renderBottomNav()}
   `;
   bindEvents();
+}
+
+function renderUtilityRow(character) {
+  const gritContent = renderGrit(character);
+  return `
+      <div class="utility-row">
+        <div class="grit-panel">
+          <div class="grit-title"><span>堅韌</span>${character.level < 2 ? `<span class="grit-locked">2等級開啟</span>` : ""}</div>
+          ${gritContent ? `<div class="grit-dots">${gritContent}</div>` : ""}
+        </div>
+        <button class="notes-button" data-action="notes">筆記</button>
+      </div>
+  `;
 }
 
 function renderSlots(character) {
@@ -346,8 +350,10 @@ function renderCard(card, slotId) {
   const metaClass = card.name === "錢袋" ? "meta-left" : "";
   return `
     <article class="item-card ${card.type === "condition" ? "condition" : ""} ${spanClass}" data-card="${card.id}" data-slot-card="${slotId}" data-long-card="${slotId}">
-      <div class="item-title">${escapeHtml(card.name)}</div>
-      ${card.usageMax ? `<div class="usage-count">${Math.max(0, Number(card.usageMax || 0) - Number(card.usage || 0))}</div>` : ""}
+      <div class="item-header">
+        <div class="item-title">${escapeHtml(card.name)}</div>
+        ${card.usageMax ? `<div class="usage-count">${Math.max(0, Number(card.usageMax || 0) - Number(card.usage || 0))}</div>` : ""}
+      </div>
       ${card.damage ? `<div class="damage-badge">${escapeHtml(card.damage)}</div>` : ""}
       ${card.armor ? `<div class="armor-badge">${escapeHtml(card.armor)}</div>` : ""}
       <div class="item-art">${card.type === "condition" ? renderConditionArt(conditionEffect) : renderCardArt(card)}</div>
@@ -368,7 +374,6 @@ function getCardMetaText(card) {
 function renderConditionArt(effect) {
   return `
     <div class="condition-art">
-      <span class="condition-mark">!</span>
       ${effect ? `<span class="condition-effect">${escapeHtml(effect)}</span>` : ""}
     </div>
   `;
@@ -382,7 +387,7 @@ function getSpanClass(card, target) {
 }
 
 function renderCardArt(card) {
-  if (card.type === "condition") return `<span class="condition-mark">!</span>`;
+  if (card.type === "condition") return "";
   const key = card.icon || "blank";
   const imageSource = getImageSource(key);
   if (imageSource) {
@@ -792,7 +797,7 @@ function rollDice(sides) {
     <div class="dice-result">
       <div>
         <div class="dice-faces ${rollTwoDice ? "two" : ""}" data-dice-faces>
-          ${results.map(() => `<div class="dice-face rolling" data-dice-face>?</div>`).join("")}
+          ${results.map(() => `<div class="dice-face rolling" data-dice-face="${sides}">?</div>`).join("")}
         </div>
         <p class="dice-caption">d${sides}</p>
       </div>
@@ -1257,7 +1262,7 @@ function closeContext() {
 function openModal(title, body, binder) {
   const backdrop = document.createElement("div");
   backdrop.className = "modal-backdrop";
-  backdrop.innerHTML = `<div class="modal"><h2>${escapeHtml(title)}</h2>${body}</div>`;
+  backdrop.innerHTML = `<div class="modal"><div class="modal-title-row"><h2>${escapeHtml(title)}</h2></div>${body}</div>`;
   document.body.appendChild(backdrop);
   const modal = backdrop.querySelector(".modal");
   modal.querySelector("[data-cancel]")?.addEventListener("click", () => backdrop.remove());
@@ -1265,6 +1270,14 @@ function openModal(title, body, binder) {
     if (event.target === backdrop) backdrop.remove();
   });
   binder(modal, () => backdrop.remove());
+}
+
+function addModalBack(modal, close, onBack) {
+  modal.querySelector(".modal-title-row")?.insertAdjacentHTML("afterbegin", `<button class="modal-back-button" data-title-back aria-label="回上一頁">←</button>`);
+  modal.querySelector("[data-title-back]").addEventListener("click", () => {
+    close();
+    onBack();
+  });
 }
 
 function openIdentityModal() {
@@ -1362,7 +1375,7 @@ function openMoneySheet() {
   const character = activeCharacter();
   const maxMoney = moneyLimit(character);
   openBottomSheet("金錢", `
-    <label class="field">目前金錢<input data-money-edit type="number" min="0" max="${maxMoney}" value="${Number(character.money || 0)}"></label>
+    <input class="sheet-input" data-money-edit aria-label="金錢" type="number" min="0" max="${maxMoney}" value="${Number(character.money || 0)}">
     <p class="field-hint">上限：${maxMoney}</p>
     <div class="actions"><button class="primary" data-save>儲存</button></div>
   `, (sheet, close) => {
@@ -1590,25 +1603,25 @@ function openCustomConditionModal(slotId) {
 function openSettings() {
   openModal("設定", `
     <div class="settings-list">
-      <button data-characters>角色</button>
-      <button data-import>輸入種子碼</button>
+      <button data-export>匯出種子碼</button>
+      <button data-characters>選擇角色</button>
     </div>
     <div class="actions"></div>
   `, (modal, close) => {
+    modal.querySelector("[data-export]").addEventListener("click", () => {
+      close();
+      openExportSeedModal();
+    });
     modal.querySelector("[data-characters]").addEventListener("click", () => {
       close();
       openCharactersModal();
-    });
-    modal.querySelector("[data-import]").addEventListener("click", () => {
-      close();
-      openImportModal();
     });
   });
 }
 
 function openCharactersModal() {
   const current = activeCharacter();
-  openModal("角色", `
+  openModal("選擇角色", `
     <div class="character-list">
       ${state.characters.map((character) => `
         <div class="character-row">
@@ -1619,11 +1632,11 @@ function openCharactersModal() {
       `).join("")}
     </div>
     <div class="actions">
-      
-      <button class="secondary" data-export>匯出種子碼</button>
+      <button class="secondary" data-import>輸入種子碼</button>
       <button class="primary" data-new>新增角色</button>
     </div>
   `, (modal, close) => {
+    addModalBack(modal, close, openSettings);
     modal.querySelectorAll("[data-switch]").forEach((button) => {
       button.addEventListener("click", () => {
         state.activeCharacterId = button.dataset.switch;
@@ -1649,35 +1662,55 @@ function openCharactersModal() {
       close();
       render();
     });
-    modal.querySelector("[data-export]").addEventListener("click", () => {
-      const seed = encodeSeed(activeCharacter());
-      modal.querySelector("[data-seed-output]")?.remove();
-      modal.insertAdjacentHTML("beforeend", `
-        <div class="seed-output" data-seed-output>
-          <label class="field">角色種子碼<textarea readonly data-export-seed rows="5">${seed}</textarea></label>
-          <button class="primary" data-copy-seed>複製種子碼</button>
-        </div>
-      `);
-      modal.querySelector("[data-copy-seed]").addEventListener("click", async () => {
-        const textarea = modal.querySelector("[data-export-seed]");
-        textarea.select();
-        try {
-          await navigator.clipboard.writeText(seed);
-          modal.querySelector("[data-copy-seed]").textContent = "已複製";
-        } catch {
-          document.execCommand("copy");
-          modal.querySelector("[data-copy-seed]").textContent = "已複製";
-        }
-      });
+    modal.querySelector("[data-import]").addEventListener("click", () => {
+      close();
+      openImportModal();
     });
+  });
+}
+
+function openExportSeedModal() {
+  openModal("匯出種子碼", `
+    ${renderSeedOutput()}
+  `, (modal, close) => {
+    addModalBack(modal, close, openSettings);
+    bindSeedCopy(modal);
+  });
+}
+
+function renderSeedOutput() {
+  const seed = encodeSeed(activeCharacter());
+  return `
+    <div class="seed-output compact" data-seed-output>
+      <label class="field">角色種子碼<textarea readonly data-export-seed rows="7">${seed}</textarea></label>
+      <button class="primary" data-copy-seed>複製種子碼</button>
+    </div>
+  `;
+}
+
+function bindSeedCopy(modal) {
+  const seed = modal.querySelector("[data-export-seed]")?.value || "";
+  modal.querySelector("[data-copy-seed]").addEventListener("click", async () => {
+    const textarea = modal.querySelector("[data-export-seed]");
+    textarea.select();
+    try {
+      await navigator.clipboard.writeText(seed);
+      modal.querySelector("[data-copy-seed]").textContent = "已複製";
+    } catch {
+      document.execCommand("copy");
+      modal.querySelector("[data-copy-seed]").textContent = "已複製";
+    }
   });
 }
 
 function openImportModal() {
   openModal("輸入種子碼", `
     <label class="field">種子碼<textarea data-seed rows="7"></textarea></label>
-    <div class="actions"><button class="primary" data-save>匯入</button></div>
+    <div class="actions">
+      <button class="primary" data-save>匯入</button>
+    </div>
   `, (modal, close) => {
+    addModalBack(modal, close, openCharactersModal);
     modal.querySelector("[data-save]").addEventListener("click", () => {
       try {
         const imported = decodeSeed(modal.querySelector("[data-seed]").value.trim());
