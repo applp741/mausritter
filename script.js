@@ -2,11 +2,6 @@
 const DATABASE_CSV_URL = "https://docs.google.com/spreadsheets/d/1YSE23y_C5d89gnkpGNfNltN0UQ1sMazzDA0W7FweBRI/export?format=csv&gid=0";
 const BASE_MONEY_LIMIT = 250;
 const diceTypes = [6, 8, 10, 20];
-const localItemImageNames = new Set([
-  "臨時武器", "針", "斧", "劍", "匕首", "錘", "投石索", "箭矢", "石頭",
-  "戰錘", "戰鎚", "長矛", "長鉤", "弓", "輕甲", "重甲", "火炬", "提燈",
-  "電提燈", "錢袋", "口糧",
-]);
 const equipSlots = [
   { id: "mainPaw", label: "主爪", row: 0, col: 0, region: "paw" },
   { id: "bodyA", label: "身體", row: 0, col: 1, region: "body" },
@@ -390,8 +385,15 @@ function renderCardArt(card) {
   if (card.type === "condition") return "";
   const key = card.icon || "blank";
   const imageSource = getImageSource(key);
+  const localImageSource = getImageSource(getLocalItemImage(card.name));
   if (imageSource) {
-    return `<img class="item-image" src="${escapeAttr(imageSource)}" alt="${escapeAttr(card.name || "物品圖片")}" loading="lazy" decoding="async">`;
+    const fallback = localImageSource && localImageSource !== imageSource
+      ? `this.onerror=null;this.src='${escapeAttr(localImageSource)}';`
+      : "this.onerror=null;this.style.display='none';";
+    return `<img class="item-image" src="${escapeAttr(imageSource)}" alt="${escapeAttr(card.name || "物品圖片")}" loading="lazy" decoding="async" onerror="${fallback}">`;
+  }
+  if (localImageSource) {
+    return `<img class="item-image" src="${escapeAttr(localImageSource)}" alt="${escapeAttr(card.name || "物品圖片")}" loading="lazy" decoding="async" onerror="this.onerror=null;this.style.display='none';">`;
   }
   const art = {
     branch: `<svg viewBox="0 0 80 80"><path d="M22 62 53 18M42 34l20-8M36 44l-15-9" /><path d="M55 23l10 8-8 8-10-8z" /></svg>`,
@@ -1174,9 +1176,13 @@ function getSlotInfo(slotId) {
 
 function openEmptySlotMenu(slotId) {
   const isPack = slotId.startsWith("pack");
+  if (!isPack) {
+    openItemModal(slotId);
+    return;
+  }
   openContext("", `
     <button class="primary" data-add-item>新增物品</button>
-    ${isPack ? `<button class="secondary" data-add-condition>新增狀態</button>` : ""}
+    <button class="secondary" data-add-condition>新增狀態</button>
   `, (menu) => {
     menu.querySelector("[data-add-item]").addEventListener("click", () => {
       closeContext();
@@ -1783,10 +1789,11 @@ async function loadDatabasePresets() {
       }
 
       if (!type || ["item", "物品", "物品卡", "weapon", "armor", "gear", "equipment", "裝備"].includes(type)) {
+        const sheetImage = getRecordValue(record, ["icon", "圖示", "素材", "圖片"]);
         nextItems.push({
           name,
           kind: getRecordValue(record, ["kind", "屬性", "物品類型", "分類"]) || "物品",
-          icon: getLocalItemImage(name) || getRecordValue(record, ["icon", "圖示", "素材", "圖片"]) || "blank",
+          icon: sheetImage || getLocalItemImage(name) || "blank",
           usageMax: Number(getRecordValue(record, ["usageMax", "usage", "使用點", "使用次數", "點數"]) || 0),
           damage: getRecordValue(record, ["damage", "骰子", "傷害", "傷害骰"]),
           armor: normalizeArmor(getRecordValue(record, ["armor", "護甲值", "護甲"])),
@@ -1860,10 +1867,13 @@ function normalizeHeader(value) {
 }
 
 function getLocalItemImage(name) {
-  const normalizedName = String(name || "").trim();
-  if (!normalizedName) return "";
-  const fileName = normalizedName === "戰鎚" ? "戰錘" : normalizedName;
-  return localItemImageNames.has(normalizedName) ? `assets/items/${fileName}.png` : "";
+  const fileName = getLocalImageFileName(name);
+  return fileName ? `assets/items/${fileName}` : "";
+}
+
+function getLocalImageFileName(name) {
+  const normalizedName = String(name || "").trim().replace(/[\\/:*?"<>|]/g, "_");
+  return normalizedName ? `${normalizedName}.png` : "";
 }
 
 function normalizeSlotShape(value) {

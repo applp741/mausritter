@@ -14,6 +14,17 @@ Then open:
 http://127.0.0.1:8976/index.html
 ```
 
+## Sync Item Images
+
+After updating the Google Sheet image column, run:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\sync-item-images.ps1
+```
+
+The sync downloads only missing images, or images whose Sheet source URL changed.
+Downloaded files are saved to `assets/items/{item name}.png`, and source metadata is tracked in `assets/items/manifest.json`.
+
 ## Current Scope
 
 - Character identity, portrait, level, HP, STR/DEX/WIL, money, grit, and notes.

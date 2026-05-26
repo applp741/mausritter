@@ -1,152 +1,282 @@
-[
-  {
-    "index": 1,
-    "name": "提燈",
-    "path": "assets/items/提燈.png",
-    "source": "assets/source-drive/01-1m-ysW_iqNNGE6vCrHLVpzXvrOmDmhYtc.png"
-  },
-  {
-    "index": 2,
-    "name": "火炬",
-    "path": "assets/items/火炬.png",
-    "source": "assets/source-drive/02-1iTZ5qp5EiJ0P4m_gjUqPrK2qbFQoX-9-.png"
-  },
-  {
-    "index": 3,
-    "name": "電提燈",
-    "path": "assets/items/電提燈.png",
-    "source": "assets/source-drive/03-1uqrjnJ1F8R3rh1ly-9YdxkN3mu-cSHZL.png"
-  },
-  {
-    "index": 4,
-    "name": "錢袋",
-    "path": "assets/items/錢袋.png",
-    "source": "assets/source-drive/04-1AEooWJTdcbgv6qWuBmXt6z1bH20vaqcl.png"
-  },
-  {
-    "index": 5,
-    "name": "口糧",
-    "path": "assets/items/口糧.png",
-    "source": "assets/source-drive/05-1sGcAE7gdHemLZ6jtT9ig0Jd9YJsfYakb.png"
-  },
-  {
-    "index": 6,
-    "name": "法術石板-01",
-    "path": "assets/items/法術石板-01.png",
-    "source": "assets/source-drive/06-1-P7kkdxlnZ5kEjAKxwplB-lr93KoHm5g.png"
-  },
-  {
-    "index": 7,
-    "name": "法術石板-02",
-    "path": "assets/items/法術石板-02.png",
-    "source": "assets/source-drive/07-1xZWckUZRj2Auz5yaZuDZKTQHky1EX8YO.png"
-  },
-  {
-    "index": 8,
-    "name": "法術石板-03",
-    "path": "assets/items/法術石板-03.png",
-    "source": "assets/source-drive/08-1lUAYYKoukJ7DKSgr0DOTlejlvXzT_TYc.png"
-  },
-  {
-    "index": 9,
-    "name": "法術石板-04",
-    "path": "assets/items/法術石板-04.png",
-    "source": "assets/source-drive/09-1m0iuwQ08xib0CcQNuqNyqtG3qhCd6SYo.png"
-  },
-  {
-    "index": 10,
-    "name": "法術石板-05",
-    "path": "assets/items/法術石板-05.png",
-    "source": "assets/source-drive/10-1UIMFDRIA245vf6Xexv48Fdm5iwFB1Mws.png"
-  },
-  {
-    "index": 11,
-    "name": "臨時武器",
-    "path": "assets/items/臨時武器.png",
-    "source": "assets/source-drive/11-11mY_F4VwS-t7hUeBVESTmiesmaROqJ1Z.png"
-  },
-  {
-    "index": 12,
-    "name": "針",
-    "path": "assets/items/針.png",
-    "source": "assets/source-drive/12-1limE2lhfIgoev5fC-9Dgo_UHTzRvoImP.png"
-  },
-  {
-    "index": 13,
-    "name": "匕首",
-    "path": "assets/items/匕首.png",
-    "source": "assets/source-drive/13-1NdInFgo9oM6QW2Bs-1NK1FAO4RQHn_eZ.png"
-  },
-  {
-    "index": 14,
-    "name": "石頭",
-    "path": "assets/items/石頭.png",
-    "source": "assets/source-drive/14-1IeeFOyXgWqtcE2MOaHGfjID5h46nqW2f.png"
-  },
-  {
-    "index": 15,
-    "name": "箭矢",
-    "path": "assets/items/箭矢.png",
-    "source": "assets/source-drive/15-1TM90OpDt_IPy4hQdfFYG51P_CT8pBrq3.png"
-  },
-  {
-    "index": 16,
-    "name": "重甲",
-    "path": "assets/items/重甲.png",
-    "source": "assets/source-drive/16-1tP8aRZy_7_Og5mwd4Z4-uJND-WpTG7qb.png"
-  },
-  {
-    "index": 17,
-    "name": "輕甲",
-    "path": "assets/items/輕甲.png",
-    "source": "assets/source-drive/17-1ahD4yNPIYvl2ikZOM0IFDgujXCnWkWik.png"
-  },
-  {
-    "index": 18,
-    "name": "斧",
-    "path": "assets/items/斧.png",
-    "source": "assets/source-drive/18-1PQEQPJXa4404hhMQB2w7C847zlIeo62J.png"
-  },
-  {
-    "index": 19,
-    "name": "劍",
-    "path": "assets/items/劍.png",
-    "source": "assets/source-drive/19-1Wnvz06dyrqP3IhUUHUMFRylbi7f1uMcE.png"
-  },
-  {
-    "index": 20,
-    "name": "錘",
-    "path": "assets/items/錘.png",
-    "source": "assets/source-drive/20-1QCwa-ypWdsdiRi5VVE9QaK3Aaun4vk3Q.png"
-  },
-  {
-    "index": 21,
-    "name": "投石索",
-    "path": "assets/items/投石索.png",
-    "source": "assets/source-drive/21-1uwBGXKTKW4C66ShlyeWfDnmM1khFct9t.png"
-  },
-  {
-    "index": 22,
-    "name": "戰錘",
-    "path": "assets/items/戰錘.png",
-    "source": "assets/source-drive/22-1jkXZeVOpWMmnLqBkMs98mQI91_zvXjMC.png"
-  },
-  {
-    "index": 23,
-    "name": "長矛",
-    "path": "assets/items/長矛.png",
-    "source": "assets/source-drive/23-1Unwyvk_QUwV_szrUxi5mgj-U5MvouJ6W.png"
-  },
-  {
-    "index": 24,
-    "name": "長鉤",
-    "path": "assets/items/長鉤.png",
-    "source": "assets/source-drive/24-1h5XpGuvckt_dqAwmA0WR93SfGvWhw6ns.png"
-  },
-  {
-    "index": 25,
-    "name": "弓",
-    "path": "assets/items/弓.png",
-    "source": "assets/source-drive/25-1Lmsk_gXF82OaKYp8HPeeNCJHFKQyLepN.png"
-  }
+﻿[
+    {
+        "name":  "匕首",
+        "path":  "assets/items/匕首.png",
+        "source":  "https://drive.google.com/file/d/1zn2Sdf4WzPaTvodM-ozcZNEteMqXVa2i/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1zn2Sdf4WzPaTvodM-ozcZNEteMqXVa2i\u0026sz=w800",
+        "sha256":  "2fd83209eb746246148dc8a8949a67e60488f8afc0518cd07ecbb0a5e1fbfff7",
+        "updatedAt":  "2026-05-26T21:26:22.1774719+08:00"
+    },
+    {
+        "name":  "口糧",
+        "path":  "assets/items/口糧.png",
+        "source":  "https://drive.google.com/file/d/1kQaDVd_aeq1Zxac1nMH0gkfPDTN7-kXE/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1kQaDVd_aeq1Zxac1nMH0gkfPDTN7-kXE\u0026sz=w800",
+        "sha256":  "4c1601b16ee8d5dd96608ab3e8b859f438293b95a8c775aaac700d306f9a945b",
+        "updatedAt":  "2026-05-26T21:26:38.3421851+08:00"
+    },
+    {
+        "name":  "弓",
+        "path":  "assets/items/弓.png",
+        "source":  "https://drive.google.com/file/d/1OJ3KuLas-cWunqu67-pLZ2JPNs2sWZqR/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1OJ3KuLas-cWunqu67-pLZ2JPNs2sWZqR\u0026sz=w800",
+        "sha256":  "d5a980e47c3ea4eee937c8cc85d1d4c916c99f0bb7f89a9ec99cfda9d6e0cf0b",
+        "updatedAt":  "2026-05-26T21:26:29.1272988+08:00"
+    },
+    {
+        "name":  "火炬",
+        "path":  "assets/items/火炬.png",
+        "source":  "https://drive.google.com/file/d/1FEXkMaxYduwR8BYZC3cBVJhs7BmaHJou/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1FEXkMaxYduwR8BYZC3cBVJhs7BmaHJou\u0026sz=w800",
+        "sha256":  "fc28146eaea1e2a8e2b1a221f6d85d79c02223ea2c3d470ceacf18c9371d1e0f",
+        "updatedAt":  "2026-05-26T21:26:34.0768002+08:00"
+    },
+    {
+        "name":  "火球術",
+        "path":  "assets/items/火球術.png",
+        "source":  "https://drive.google.com/file/d/1JOCIkJMhrez-PtZI4I4c_-a3AwIALHtt/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1JOCIkJMhrez-PtZI4I4c_-a3AwIALHtt\u0026sz=w800",
+        "sha256":  "c29e7fb8d019d7103b63c19dbd2fa6b5c390a353967accc6ef94d981b85ae3bb",
+        "updatedAt":  "2026-05-26T21:26:40.8464631+08:00"
+    },
+    {
+        "name":  "石頭",
+        "path":  "assets/items/石頭.png",
+        "source":  "https://drive.google.com/file/d/1azriLFxZmhmXdm4kKSgI1kz_QLqtcSCy/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1azriLFxZmhmXdm4kKSgI1kz_QLqtcSCy\u0026sz=w800",
+        "sha256":  "f90db4addbbebb685b5a0937534cc056a7171a4d087c62c92ae793ba72a8b2dc",
+        "updatedAt":  "2026-05-26T21:26:26.4328472+08:00"
+    },
+    {
+        "name":  "成長術",
+        "path":  "assets/items/成長術.png",
+        "source":  "https://drive.google.com/file/d/1PBU5Lh1YZYiEdWQ69KZHCXZtvXiyJmVk/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1PBU5Lh1YZYiEdWQ69KZHCXZtvXiyJmVk\u0026sz=w800",
+        "sha256":  "448d48ffb9949dd6755b14125300a975cda98d72299826c83dc91d815a5b2b11",
+        "updatedAt":  "2026-05-26T21:27:01.7700103+08:00"
+    },
+    {
+        "name":  "投石索",
+        "path":  "assets/items/投石索.png",
+        "source":  "https://drive.google.com/file/d/1DuxuVx9p5hoHmETfFIGTxsw8aj_koZTP/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1DuxuVx9p5hoHmETfFIGTxsw8aj_koZTP\u0026sz=w800",
+        "sha256":  "d94308f1c3b408d7707d136238586be027a03a7b862d3b80f67798e5b00ba78d",
+        "updatedAt":  "2026-05-26T21:26:23.9821135+08:00"
+    },
+    {
+        "name":  "斧",
+        "path":  "assets/items/斧.png",
+        "source":  "https://drive.google.com/file/d/1LFRJeW7Eua4PkIl2ot_xL6jC4KmzyXck/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1LFRJeW7Eua4PkIl2ot_xL6jC4KmzyXck\u0026sz=w800",
+        "sha256":  "710b6880da636aee57b0c518b53a8d23096de0898e8abf416ac9d8e05c0b2451",
+        "updatedAt":  "2026-05-26T21:26:20.4228760+08:00"
+    },
+    {
+        "name":  "治療術",
+        "path":  "assets/items/治療術.png",
+        "source":  "https://drive.google.com/file/d/1PBU5Lh1YZYiEdWQ69KZHCXZtvXiyJmVk/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1PBU5Lh1YZYiEdWQ69KZHCXZtvXiyJmVk\u0026sz=w800",
+        "sha256":  "448d48ffb9949dd6755b14125300a975cda98d72299826c83dc91d815a5b2b11",
+        "updatedAt":  "2026-05-26T21:26:42.9233515+08:00"
+    },
+    {
+        "name":  "長矛",
+        "path":  "assets/items/長矛.png",
+        "source":  "https://drive.google.com/file/d/147xu5d1SaXboll3Pg2PrrWudp0oHHbgp/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=147xu5d1SaXboll3Pg2PrrWudp0oHHbgp\u0026sz=w800",
+        "sha256":  "eee4fd80ea70d6aff4571a561e4595d05a500a5a236cfa3b44011433e2217c47",
+        "updatedAt":  "2026-05-26T21:26:27.8881713+08:00"
+    },
+    {
+        "name":  "長鉤",
+        "path":  "assets/items/長鉤.png",
+        "source":  "https://drive.google.com/file/d/1x-ucYSfaxs_vDEWVgrDzdQoUcCb2Q1gv/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1x-ucYSfaxs_vDEWVgrDzdQoUcCb2Q1gv\u0026sz=w800",
+        "sha256":  "cdd5d0a22addc1f411dd511f633d276ea00d3c5f0299ab0fa5d3b2f523185484",
+        "updatedAt":  "2026-05-26T21:26:28.4977260+08:00"
+    },
+    {
+        "name":  "幽靈甲蟲",
+        "path":  "assets/items/幽靈甲蟲.png",
+        "source":  "https://drive.google.com/file/d/1JOCIkJMhrez-PtZI4I4c_-a3AwIALHtt/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1JOCIkJMhrez-PtZI4I4c_-a3AwIALHtt\u0026sz=w800",
+        "sha256":  "c29e7fb8d019d7103b63c19dbd2fa6b5c390a353967accc6ef94d981b85ae3bb",
+        "updatedAt":  "2026-05-26T21:26:53.1841900+08:00"
+    },
+    {
+        "name":  "重甲",
+        "path":  "assets/items/重甲.png",
+        "source":  "https://drive.google.com/file/d/1f3Q9RqBfVIkWPQ2qW4q4Nv_bZeRMiBsV/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1f3Q9RqBfVIkWPQ2qW4q4Nv_bZeRMiBsV\u0026sz=w800",
+        "sha256":  "9c3d985283f5181745b7c493ba9dfee28bae495d24a10ce15777dcb79c76c5ab",
+        "updatedAt":  "2026-05-26T21:26:32.2331232+08:00"
+    },
+    {
+        "name":  "恐懼術",
+        "path":  "assets/items/恐懼術.png",
+        "source":  "https://drive.google.com/file/d/1qsmPc69cVYDasT1cC6PECFsLsW7z9yVB/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1qsmPc69cVYDasT1cC6PECFsLsW7z9yVB\u0026sz=w800",
+        "sha256":  "343696e5830e17200a4a59f47c41e8cb1c42a7ad34e493fe9af1ba9cf90e29d0",
+        "updatedAt":  "2026-05-26T21:26:46.3965107+08:00"
+    },
+    {
+        "name":  "針",
+        "path":  "assets/items/針.png",
+        "source":  "https://drive.google.com/file/d/1ULEVkvymVAyK6Dd8sCVoPJF9UwwMZlcH/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1ULEVkvymVAyK6Dd8sCVoPJF9UwwMZlcH\u0026sz=w800",
+        "sha256":  "a9b3e8bd78934154b7b9a7f5c344379d1b0bc985da983cb2ee4a139697003197",
+        "updatedAt":  "2026-05-26T21:26:19.5821113+08:00"
+    },
+    {
+        "name":  "閃光術",
+        "path":  "assets/items/閃光術.png",
+        "source":  "https://drive.google.com/file/d/1qsmPc69cVYDasT1cC6PECFsLsW7z9yVB/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1qsmPc69cVYDasT1cC6PECFsLsW7z9yVB\u0026sz=w800",
+        "sha256":  "343696e5830e17200a4a59f47c41e8cb1c42a7ad34e493fe9af1ba9cf90e29d0",
+        "updatedAt":  "2026-05-26T21:26:55.0463893+08:00"
+    },
+    {
+        "name":  "被理解",
+        "path":  "assets/items/被理解.png",
+        "source":  "https://drive.google.com/file/d/1fNop0q6Jp1RA22dMySOaxpLhgMNRfVCR/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1fNop0q6Jp1RA22dMySOaxpLhgMNRfVCR\u0026sz=w800",
+        "sha256":  "be8ac6c72cf1f048ae49bedded12c12195490c3415e77aeb00cd1d41e7760dce",
+        "updatedAt":  "2026-05-26T21:26:51.6017504+08:00"
+    },
+    {
+        "name":  "復原術",
+        "path":  "assets/items/復原術.png",
+        "source":  "https://drive.google.com/file/d/1QIDCd34lgotzTyT7VqtWTs5JDk6LigWA/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1QIDCd34lgotzTyT7VqtWTs5JDk6LigWA\u0026sz=w800",
+        "sha256":  "2d7fb891021385062b0917d9316eb51136270432e0d26ab1e2a8dba25d4344b3",
+        "updatedAt":  "2026-05-26T21:26:49.9142157+08:00"
+    },
+    {
+        "name":  "提燈",
+        "path":  "assets/items/提燈.png",
+        "source":  "https://drive.google.com/file/d/1dlcmyL0bWm-PliyPehXuh9tQS0lwM_eE/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1dlcmyL0bWm-PliyPehXuh9tQS0lwM_eE\u0026sz=w800",
+        "sha256":  "956ac21d3da09da8c10e6546127118391be2c7f28f45436d7c2785cd27cb57d8",
+        "updatedAt":  "2026-05-26T21:26:35.1697943+08:00"
+    },
+    {
+        "name":  "無形之環",
+        "path":  "assets/items/無形之環.png",
+        "source":  "https://drive.google.com/file/d/1PBU5Lh1YZYiEdWQ69KZHCXZtvXiyJmVk/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1PBU5Lh1YZYiEdWQ69KZHCXZtvXiyJmVk\u0026sz=w800",
+        "sha256":  "448d48ffb9949dd6755b14125300a975cda98d72299826c83dc91d815a5b2b11",
+        "updatedAt":  "2026-05-26T21:26:56.8079915+08:00"
+    },
+    {
+        "name":  "黑暗術",
+        "path":  "assets/items/黑暗術.png",
+        "source":  "https://drive.google.com/file/d/1QIDCd34lgotzTyT7VqtWTs5JDk6LigWA/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1QIDCd34lgotzTyT7VqtWTs5JDk6LigWA\u0026sz=w800",
+        "sha256":  "2d7fb891021385062b0917d9316eb51136270432e0d26ab1e2a8dba25d4344b3",
+        "updatedAt":  "2026-05-26T21:26:48.2196745+08:00"
+    },
+    {
+        "name":  "電提燈",
+        "path":  "assets/items/電提燈.png",
+        "source":  "https://drive.google.com/file/d/1g_pPx7JLbjVEVhlAOIqM9adw0tw9y96c/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1g_pPx7JLbjVEVhlAOIqM9adw0tw9y96c\u0026sz=w800",
+        "sha256":  "d703d8e5baba9848a2afd945a265d0ac89ed9a981630b48b264f40adb15378f1",
+        "updatedAt":  "2026-05-26T21:26:36.1251683+08:00"
+    },
+    {
+        "name":  "敲開",
+        "path":  "assets/items/敲開.png",
+        "source":  "https://drive.google.com/file/d/1QIDCd34lgotzTyT7VqtWTs5JDk6LigWA/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1QIDCd34lgotzTyT7VqtWTs5JDk6LigWA\u0026sz=w800",
+        "sha256":  "2d7fb891021385062b0917d9316eb51136270432e0d26ab1e2a8dba25d4344b3",
+        "updatedAt":  "2026-05-26T21:26:58.4795122+08:00"
+    },
+    {
+        "name":  "輕甲",
+        "path":  "assets/items/輕甲.png",
+        "source":  "https://drive.google.com/file/d/15-E2XSibXu4KrobJhEDgnr-msMLhWHdk/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=15-E2XSibXu4KrobJhEDgnr-msMLhWHdk\u0026sz=w800",
+        "sha256":  "f88da91af3958d3ea0c905ea8f643466f198dfc5ec7fa9b9368c4871374e6d34",
+        "updatedAt":  "2026-05-26T21:26:30.4975443+08:00"
+    },
+    {
+        "name":  "劍",
+        "path":  "assets/items/劍.png",
+        "source":  "https://drive.google.com/file/d/1Pd5QueArnnxQUQBKj6OGBJeMScIdF4nU/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1Pd5QueArnnxQUQBKj6OGBJeMScIdF4nU\u0026sz=w800",
+        "sha256":  "c69b0a1ec9e54975731d88b109a50d3803c35441e6e5ce17e7ad5c634dcec2c9",
+        "updatedAt":  "2026-05-26T21:26:21.1875717+08:00"
+    },
+    {
+        "name":  "潤滑油",
+        "path":  "assets/items/潤滑油.png",
+        "source":  "https://drive.google.com/file/d/1JOCIkJMhrez-PtZI4I4c_-a3AwIALHtt/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1JOCIkJMhrez-PtZI4I4c_-a3AwIALHtt\u0026sz=w800",
+        "sha256":  "c29e7fb8d019d7103b63c19dbd2fa6b5c390a353967accc6ef94d981b85ae3bb",
+        "updatedAt":  "2026-05-26T21:27:00.0594543+08:00"
+    },
+    {
+        "name":  "箭矢",
+        "path":  "assets/items/箭矢.png",
+        "source":  "https://drive.google.com/file/d/1p_nJHd0NbJQAecQnUSCImE2SceYE0yMa/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1p_nJHd0NbJQAecQnUSCImE2SceYE0yMa\u0026sz=w800",
+        "sha256":  "88e5a7aea89df218620990090cec619c3097e432c3f54580a2ede5c776ceca63",
+        "updatedAt":  "2026-05-26T21:26:25.0555941+08:00"
+    },
+    {
+        "name":  "戰錘",
+        "path":  "assets/items/戰錘.png",
+        "source":  "https://drive.google.com/file/d/1kcX-Xz968J_FsBTmAHOhe_Whe_rZg085/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1kcX-Xz968J_FsBTmAHOhe_Whe_rZg085\u0026sz=w800",
+        "sha256":  "c55728ae30746014a7ba0b701ee70b8a74377d5fb6aa4fc117136e6217f2d4a7",
+        "updatedAt":  "2026-05-26T21:26:27.3146493+08:00"
+    },
+    {
+        "name":  "貓薄荷",
+        "path":  "assets/items/貓薄荷.png",
+        "source":  "https://drive.google.com/file/d/1JOCIkJMhrez-PtZI4I4c_-a3AwIALHtt/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1JOCIkJMhrez-PtZI4I4c_-a3AwIALHtt\u0026sz=w800",
+        "sha256":  "c29e7fb8d019d7103b63c19dbd2fa6b5c390a353967accc6ef94d981b85ae3bb",
+        "updatedAt":  "2026-05-26T21:27:04.9068634+08:00"
+    },
+    {
+        "name":  "錢袋",
+        "path":  "assets/items/錢袋.png",
+        "source":  "https://drive.google.com/file/d/16U-sRw1dFr2ArR95UkcTCnxwX-7nJ8H4/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=16U-sRw1dFr2ArR95UkcTCnxwX-7nJ8H4\u0026sz=w800",
+        "sha256":  "4a72dbf3aa2e8df1416a5b74ff263aee4f8cb559674455c7155bd36d121d60c8",
+        "updatedAt":  "2026-05-26T21:26:37.1320853+08:00"
+    },
+    {
+        "name":  "臨時武器",
+        "path":  "assets/items/臨時武器.png",
+        "source":  "https://drive.google.com/file/d/1IhiQtbyyRT_G8x7pdipxyBP5e3rL6g-K/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1IhiQtbyyRT_G8x7pdipxyBP5e3rL6g-K\u0026sz=w800",
+        "sha256":  "bcff43049c0dd8b0823822e2b869459ecc9520bed729fabc2bd46948acbe7bf5",
+        "updatedAt":  "2026-05-26T21:26:18.8334303+08:00"
+    },
+    {
+        "name":  "錘",
+        "path":  "assets/items/錘.png",
+        "source":  "https://drive.google.com/file/d/1fhID19_nEuuEvQ7WqnvSlx4UY9W11yXX/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1fhID19_nEuuEvQ7WqnvSlx4UY9W11yXX\u0026sz=w800",
+        "sha256":  "d1ccbee56eb5f1d27b8b021f8b93bb28b2b614388d7d52d4f22733f729705c7d",
+        "updatedAt":  "2026-05-26T21:26:23.1013125+08:00"
+    },
+    {
+        "name":  "隱形",
+        "path":  "assets/items/隱形.png",
+        "source":  "https://drive.google.com/file/d/1qsmPc69cVYDasT1cC6PECFsLsW7z9yVB/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1qsmPc69cVYDasT1cC6PECFsLsW7z9yVB\u0026sz=w800",
+        "sha256":  "343696e5830e17200a4a59f47c41e8cb1c42a7ad34e493fe9af1ba9cf90e29d0",
+        "updatedAt":  "2026-05-26T21:27:03.3344335+08:00"
+    },
+    {
+        "name":  "魔法飛彈",
+        "path":  "assets/items/魔法飛彈.png",
+        "source":  "https://drive.google.com/file/d/1JOCIkJMhrez-PtZI4I4c_-a3AwIALHtt/view?usp=drive_link",
+        "resolvedUrl":  "https://drive.google.com/thumbnail?id=1JOCIkJMhrez-PtZI4I4c_-a3AwIALHtt\u0026sz=w800",
+        "sha256":  "c29e7fb8d019d7103b63c19dbd2fa6b5c390a353967accc6ef94d981b85ae3bb",
+        "updatedAt":  "2026-05-26T21:26:44.6619336+08:00"
+    }
 ]
