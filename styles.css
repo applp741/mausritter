@@ -386,7 +386,9 @@ button {
   border: 0;
   background: var(--paper);
   padding: 10px;
+  font-size: 20px;
   font-weight: 900;
+  line-height: 1.1;
   cursor: pointer;
 }
 
@@ -399,6 +401,7 @@ button {
   --slot-gap: 10px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: auto;
   gap: var(--slot-gap);
 }
 
@@ -413,7 +416,8 @@ button {
 }
 
 .slot {
-  min-height: 122px;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
   border: 1.5px dashed var(--dash);
   background: rgba(247, 242, 232, 0.72);
   border-radius: 6px;
@@ -422,10 +426,12 @@ button {
 }
 
 .slot.occupied-span-h {
+  aspect-ratio: 2.07 / 1;
   grid-column: span 2;
 }
 
 .slot.occupied-span-v {
+  aspect-ratio: 1 / 2.07;
   grid-row: span 2;
 }
 
@@ -442,7 +448,6 @@ button {
 
 .item-card {
   width: 100%;
-  min-height: 116px;
   height: 100%;
   background: #fffdf7;
   border: 1.5px solid var(--line);
@@ -494,23 +499,47 @@ button {
   filter: drop-shadow(0 1px 0 rgba(23, 21, 17, 0.12));
 }
 
+.item-image,
+.catalog-art .item-image {
+  display: block;
+  width: min(72px, 82%);
+  height: min(72px, 82%);
+  object-fit: contain;
+  filter: grayscale(1) contrast(1.08) drop-shadow(0 1px 0 rgba(23, 21, 17, 0.12));
+}
+
 .item-card.span-h,
 .item-card.span-v {
-  min-height: 116px;
+  min-height: 0;
 }
 
 .condition-mark {
-  font-size: 36px;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-size: 28px;
   font-weight: 900;
   color: var(--red);
+  line-height: 1;
+}
+
+.condition-art {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  max-width: 100%;
+  text-align: center;
 }
 
 .condition-effect {
-  padding: 8px 4px;
+  padding: 0 4px;
   color: #61231f;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 900;
-  line-height: 1.35;
+  line-height: 1.28;
   text-align: left;
   align-self: stretch;
   overflow: hidden;
@@ -526,6 +555,14 @@ button {
   gap: 6px;
   font-size: 12px;
   font-weight: 900;
+}
+
+.item-meta.meta-left {
+  justify-content: flex-start;
+}
+
+.item-meta.meta-left span:first-child {
+  display: none;
 }
 
 .damage-badge,
@@ -654,6 +691,8 @@ button {
 
 .grit-title {
   font-weight: 900;
+  font-size: 20px;
+  line-height: 1.1;
   display: flex;
   justify-content: space-between;
   gap: 8px;
@@ -688,6 +727,10 @@ button {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(86px, 0.36fr);
   gap: 16px;
+}
+
+.grit-panel {
+  margin-left: 12px;
 }
 
 .notes-button {
@@ -1324,7 +1367,7 @@ button {
   }
 
   .slot {
-    min-height: 98px;
+    min-height: 0;
   }
 
   .item-title {
@@ -1505,11 +1548,10 @@ button {
   }
 
   .slot {
-    min-height: 104px;
+    min-height: 0;
   }
 
   .item-card {
-    min-height: 104px;
     padding: 6px;
   }
 

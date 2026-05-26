@@ -1,0 +1,152 @@
+[
+  {
+    "index": 1,
+    "name": "提燈",
+    "path": "assets/items/提燈.png",
+    "source": "assets/source-drive/01-1m-ysW_iqNNGE6vCrHLVpzXvrOmDmhYtc.png"
+  },
+  {
+    "index": 2,
+    "name": "火炬",
+    "path": "assets/items/火炬.png",
+    "source": "assets/source-drive/02-1iTZ5qp5EiJ0P4m_gjUqPrK2qbFQoX-9-.png"
+  },
+  {
+    "index": 3,
+    "name": "電提燈",
+    "path": "assets/items/電提燈.png",
+    "source": "assets/source-drive/03-1uqrjnJ1F8R3rh1ly-9YdxkN3mu-cSHZL.png"
+  },
+  {
+    "index": 4,
+    "name": "錢袋",
+    "path": "assets/items/錢袋.png",
+    "source": "assets/source-drive/04-1AEooWJTdcbgv6qWuBmXt6z1bH20vaqcl.png"
+  },
+  {
+    "index": 5,
+    "name": "口糧",
+    "path": "assets/items/口糧.png",
+    "source": "assets/source-drive/05-1sGcAE7gdHemLZ6jtT9ig0Jd9YJsfYakb.png"
+  },
+  {
+    "index": 6,
+    "name": "法術石板-01",
+    "path": "assets/items/法術石板-01.png",
+    "source": "assets/source-drive/06-1-P7kkdxlnZ5kEjAKxwplB-lr93KoHm5g.png"
+  },
+  {
+    "index": 7,
+    "name": "法術石板-02",
+    "path": "assets/items/法術石板-02.png",
+    "source": "assets/source-drive/07-1xZWckUZRj2Auz5yaZuDZKTQHky1EX8YO.png"
+  },
+  {
+    "index": 8,
+    "name": "法術石板-03",
+    "path": "assets/items/法術石板-03.png",
+    "source": "assets/source-drive/08-1lUAYYKoukJ7DKSgr0DOTlejlvXzT_TYc.png"
+  },
+  {
+    "index": 9,
+    "name": "法術石板-04",
+    "path": "assets/items/法術石板-04.png",
+    "source": "assets/source-drive/09-1m0iuwQ08xib0CcQNuqNyqtG3qhCd6SYo.png"
+  },
+  {
+    "index": 10,
+    "name": "法術石板-05",
+    "path": "assets/items/法術石板-05.png",
+    "source": "assets/source-drive/10-1UIMFDRIA245vf6Xexv48Fdm5iwFB1Mws.png"
+  },
+  {
+    "index": 11,
+    "name": "臨時武器",
+    "path": "assets/items/臨時武器.png",
+    "source": "assets/source-drive/11-11mY_F4VwS-t7hUeBVESTmiesmaROqJ1Z.png"
+  },
+  {
+    "index": 12,
+    "name": "針",
+    "path": "assets/items/針.png",
+    "source": "assets/source-drive/12-1limE2lhfIgoev5fC-9Dgo_UHTzRvoImP.png"
+  },
+  {
+    "index": 13,
+    "name": "匕首",
+    "path": "assets/items/匕首.png",
+    "source": "assets/source-drive/13-1NdInFgo9oM6QW2Bs-1NK1FAO4RQHn_eZ.png"
+  },
+  {
+    "index": 14,
+    "name": "石頭",
+    "path": "assets/items/石頭.png",
+    "source": "assets/source-drive/14-1IeeFOyXgWqtcE2MOaHGfjID5h46nqW2f.png"
+  },
+  {
+    "index": 15,
+    "name": "箭矢",
+    "path": "assets/items/箭矢.png",
+    "source": "assets/source-drive/15-1TM90OpDt_IPy4hQdfFYG51P_CT8pBrq3.png"
+  },
+  {
+    "index": 16,
+    "name": "重甲",
+    "path": "assets/items/重甲.png",
+    "source": "assets/source-drive/16-1tP8aRZy_7_Og5mwd4Z4-uJND-WpTG7qb.png"
+  },
+  {
+    "index": 17,
+    "name": "輕甲",
+    "path": "assets/items/輕甲.png",
+    "source": "assets/source-drive/17-1ahD4yNPIYvl2ikZOM0IFDgujXCnWkWik.png"
+  },
+  {
+    "index": 18,
+    "name": "斧",
+    "path": "assets/items/斧.png",
+    "source": "assets/source-drive/18-1PQEQPJXa4404hhMQB2w7C847zlIeo62J.png"
+  },
+  {
+    "index": 19,
+    "name": "劍",
+    "path": "assets/items/劍.png",
+    "source": "assets/source-drive/19-1Wnvz06dyrqP3IhUUHUMFRylbi7f1uMcE.png"
+  },
+  {
+    "index": 20,
+    "name": "錘",
+    "path": "assets/items/錘.png",
+    "source": "assets/source-drive/20-1QCwa-ypWdsdiRi5VVE9QaK3Aaun4vk3Q.png"
+  },
+  {
+    "index": 21,
+    "name": "投石索",
+    "path": "assets/items/投石索.png",
+    "source": "assets/source-drive/21-1uwBGXKTKW4C66ShlyeWfDnmM1khFct9t.png"
+  },
+  {
+    "index": 22,
+    "name": "戰錘",
+    "path": "assets/items/戰錘.png",
+    "source": "assets/source-drive/22-1jkXZeVOpWMmnLqBkMs98mQI91_zvXjMC.png"
+  },
+  {
+    "index": 23,
+    "name": "長矛",
+    "path": "assets/items/長矛.png",
+    "source": "assets/source-drive/23-1Unwyvk_QUwV_szrUxi5mgj-U5MvouJ6W.png"
+  },
+  {
+    "index": 24,
+    "name": "長鉤",
+    "path": "assets/items/長鉤.png",
+    "source": "assets/source-drive/24-1h5XpGuvckt_dqAwmA0WR93SfGvWhw6ns.png"
+  },
+  {
+    "index": 25,
+    "name": "弓",
+    "path": "assets/items/弓.png",
+    "source": "assets/source-drive/25-1Lmsk_gXF82OaKYp8HPeeNCJHFKQyLepN.png"
+  }
+]

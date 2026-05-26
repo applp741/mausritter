@@ -2,6 +2,11 @@
 const DATABASE_CSV_URL = "https://docs.google.com/spreadsheets/d/1YSE23y_C5d89gnkpGNfNltN0UQ1sMazzDA0W7FweBRI/export?format=csv&gid=0";
 const BASE_MONEY_LIMIT = 250;
 const diceTypes = [6, 8, 10, 20];
+const localItemImageNames = new Set([
+  "臨時武器", "針", "斧", "劍", "匕首", "錘", "投石索", "箭矢", "石頭",
+  "戰錘", "戰鎚", "長矛", "長鉤", "弓", "輕甲", "重甲", "火炬", "提燈",
+  "電提燈", "錢袋", "口糧",
+]);
 const equipSlots = [
   { id: "mainPaw", label: "主爪", row: 0, col: 0, region: "paw" },
   { id: "bodyA", label: "身體", row: 0, col: 1, region: "body" },
@@ -29,7 +34,7 @@ const itemPresets = [
   { name: "火炬", kind: "光源", icon: "torch", usageMax: 3 },
   { name: "提燈", kind: "光源", icon: "lantern", usageMax: 3 },
   { name: "電提燈", kind: "光源", icon: "electricLantern", usageMax: 6 },
-  { name: "錢袋", kind: "金錢", icon: "purse", usageMax: 0, note: "/ 250" },
+  { name: "錢袋", kind: "金錢", icon: "purse", usageMax: 0, note: "容量：250" },
   { name: "口糧", kind: "消耗", icon: "ration", usageMax: 3 },
   { name: "法術石板", kind: "法術", icon: "spell", usageMax: 3 },
 ];
@@ -173,7 +178,7 @@ function normalizeCharacter(character) {
 function normalizeCard(card) {
   if (card.type === "condition") return normalizeCondition(card);
   if (card.type !== "item") return card;
-  const preset = itemPresets.find((item) => item.name === card.name);
+  const preset = findPresetForCard(card);
   if (!preset) {
     return {
       ...card,
@@ -184,6 +189,7 @@ function normalizeCard(card) {
   }
   return {
     ...card,
+    name: preset.name,
     kind: preset.kind,
     icon: preset.icon,
     usageMax: Number(preset.usageMax || card.usageMax || 0),
@@ -195,6 +201,15 @@ function normalizeCard(card) {
     slotShape: preset.slotShape || (Number(preset.slots || 1) === 2 ? "1x2" : "1x1"),
     equipRule: preset.equipRule || "any",
   };
+}
+
+function findPresetForCard(card) {
+  const exact = itemPresets.find((item) => item.name === card.name);
+  if (exact) return exact;
+  if (card.name === "臨時") {
+    return itemPresets.find((item) => item.name === "臨時武器") || itemPresets.find((item) => item.kind === "臨時");
+  }
+  return null;
 }
 
 function normalizeCondition(card) {
@@ -327,18 +342,35 @@ function renderSlots(character) {
 function renderCard(card, slotId) {
   const spanClass = getSpanClass(card, "card");
   const conditionEffect = card.type === "condition" ? getConditionEffect(card) : "";
+  const metaText = getCardMetaText(card);
+  const metaClass = card.name === "錢袋" ? "meta-left" : "";
   return `
     <article class="item-card ${card.type === "condition" ? "condition" : ""} ${spanClass}" data-card="${card.id}" data-slot-card="${slotId}" data-long-card="${slotId}">
       <div class="item-title">${escapeHtml(card.name)}</div>
       ${card.usageMax ? `<div class="usage-count">${Math.max(0, Number(card.usageMax || 0) - Number(card.usage || 0))}</div>` : ""}
       ${card.damage ? `<div class="damage-badge">${escapeHtml(card.damage)}</div>` : ""}
       ${card.armor ? `<div class="armor-badge">${escapeHtml(card.armor)}</div>` : ""}
-      <div class="item-art">${card.type === "condition" ? `<span class="condition-effect">${escapeHtml(conditionEffect)}</span>` : renderCardArt(card)}</div>
-      <div class="item-meta">
+      <div class="item-art">${card.type === "condition" ? renderConditionArt(conditionEffect) : renderCardArt(card)}</div>
+      <div class="item-meta ${metaClass}">
         <span></span>
-        <span>${escapeHtml(card.type === "condition" || card.category === "法術" ? "" : (card.note || card.detail || ""))}</span>
+        <span>${escapeHtml(metaText)}</span>
       </div>
     </article>
+  `;
+}
+
+function getCardMetaText(card) {
+  if (card.type === "condition" || card.category === "法術") return "";
+  if (card.name === "錢袋") return "容量：250";
+  return card.note || card.detail || "";
+}
+
+function renderConditionArt(effect) {
+  return `
+    <div class="condition-art">
+      <span class="condition-mark">!</span>
+      ${effect ? `<span class="condition-effect">${escapeHtml(effect)}</span>` : ""}
+    </div>
   `;
 }
 
@@ -352,6 +384,10 @@ function getSpanClass(card, target) {
 function renderCardArt(card) {
   if (card.type === "condition") return `<span class="condition-mark">!</span>`;
   const key = card.icon || "blank";
+  const imageSource = getImageSource(key);
+  if (imageSource) {
+    return `<img class="item-image" src="${escapeAttr(imageSource)}" alt="${escapeAttr(card.name || "物品圖片")}" loading="lazy" decoding="async">`;
+  }
   const art = {
     branch: `<svg viewBox="0 0 80 80"><path d="M22 62 53 18M42 34l20-8M36 44l-15-9" /><path d="M55 23l10 8-8 8-10-8z" /></svg>`,
     needle: `<svg viewBox="0 0 80 80"><path d="M18 60 61 20" /><circle cx="56" cy="24" r="5" /></svg>`,
@@ -376,6 +412,20 @@ function renderCardArt(card) {
     spell: `<svg viewBox="0 0 80 80"><path d="M21 19h38l8 41-37 8z" /><path d="M32 32l16 8-15 11M49 28l-6 27" /></svg>`,
   };
   return art[key] || `<span>${escapeHtml(key)}</span>`;
+}
+
+function getImageSource(value) {
+  const source = String(value || "").trim();
+  if (!source) return "";
+
+  const driveMatch = source.match(/drive\.google\.com\/file\/d\/([^/]+)/) || source.match(/[?&]id=([^&]+)/);
+  if (driveMatch && source.includes("drive.google.com")) {
+    return `https://drive.google.com/thumbnail?id=${encodeURIComponent(driveMatch[1])}&sz=w400`;
+  }
+
+  if (/^https?:\/\//i.test(source) || /^data:image\//i.test(source)) return source;
+  if (/^(?:\.{0,2}\/|assets\/|images\/|img\/).+\.(?:png|jpe?g|webp|gif|svg)$/i.test(source)) return source;
+  return "";
 }
 
 function renderGrit(character) {
@@ -882,9 +932,9 @@ function placeDisplacedCardAtIndex(character, displaced, index, fromRoot, source
 function placePackDisplacedCards(character, displaced, index) {
   if (index >= displaced.length) return true;
   const { card } = displaced[index];
-  for (const slot of packSlots) {
+  for (const placement of getPackPlacementOptions(card)) {
     const snapshot = cloneSlots(character.slots);
-    if (placeCard(character, slot.id, card) && placePackDisplacedCards(character, displaced, index + 1)) {
+    if (placeCardAtPlacement(character, placement, card) && placePackDisplacedCards(character, displaced, index + 1)) {
       return true;
     }
     character.slots = snapshot;
@@ -919,6 +969,10 @@ function clearSlotLinks(character, slotId) {
 
 function placeCard(character, slotId, card) {
   const placement = getTargetPlacement(slotId, card);
+  return placeCardAtPlacement(character, placement, card);
+}
+
+function placeCardAtPlacement(character, placement, card) {
   const targetSlots = placement.slots;
   if (!targetSlots.length || !areSlotsAvailable(character, targetSlots)) return false;
   character.slots[targetSlots[0]] = { ...card, placedShape: placement.shape || getSlotShape(card) };
@@ -929,22 +983,24 @@ function placeCard(character, slotId, card) {
 }
 
 function placeCardWithAutoArrange(character, slotId, card) {
-  if (placeCard(character, slotId, card)) return true;
-  if (!slotId.startsWith("pack")) return false;
+  if (!slotId.startsWith("pack")) return placeCard(character, slotId, card);
 
-  const targetSlots = getTargetSlots(slotId, card);
-  if (!targetSlots.length) return false;
+  const placements = getPackPlacementOptions(card, slotId)
+    .sort((a, b) => getDisplacedCards(character, a.slots).length - getDisplacedCards(character, b.slots).length);
+  if (!placements.length) return false;
 
-  const snapshot = cloneSlots(character.slots);
-  const displaced = getDisplacedCards(character, targetSlots);
-  displaced.forEach(({ origin }) => removeCardAt(character, origin));
+  for (const placement of placements) {
+    const snapshot = cloneSlots(character.slots);
+    const displaced = getDisplacedCards(character, placement.slots);
+    displaced.forEach(({ origin }) => removeCardAt(character, origin));
 
-  if (!placeCard(character, targetSlots[0], card) || !placePackDisplacedCards(character, displaced, 0)) {
+    if (placeCardAtPlacement(character, placement, card) && placePackDisplacedCards(character, displaced, 0)) {
+      return true;
+    }
     character.slots = snapshot;
-    return false;
   }
 
-  return true;
+  return false;
 }
 
 function canPlaceCard(character, slotId, card) {
@@ -981,24 +1037,50 @@ function getTargetPlacement(slotId, card) {
 }
 
 function getPackTargetPlacement(slot, card) {
-  if (Number(card.slots || 1) === 1) return { slots: [slot.id], shape: "1x1" };
-  const shape = getBaseSlotShape(card);
-  const candidates = packSlots
-    .map((candidate) => ({
-      slots: getGridTargetSlots(packSlots, candidate, card, shape),
-      shape,
-    }))
-    .filter((placement) => placement.slots.includes(slot.id));
-  const direct = candidates.find((placement) => placement.slots[0] === slot.id);
-  if (direct) return direct;
-  return candidates
+  return getPackPlacementOptions(card, slot.id)[0] || { slots: [], shape: getSlotShape(card) };
+}
+
+function getPackPlacementOptions(card, preferredSlotId = "") {
+  if (Number(card.slots || 1) === 1) {
+    const preferred = preferredSlotId && getSlotInfo(preferredSlotId)?.region === "pack" ? preferredSlotId : "";
+    const slotIds = unique([preferred, ...packSlots.map((slot) => slot.id)]);
+    return slotIds.map((slotId) => ({ slots: [slotId], shape: "1x1" }));
+  }
+
+  const baseShape = getBaseSlotShape(card);
+  const shapes = unique([baseShape, baseShape === "2x1" ? "1x2" : "2x1"]);
+  const preferred = getSlotInfo(preferredSlotId);
+  const placements = [];
+
+  shapes.forEach((shape) => {
+    packSlots.forEach((candidate) => {
+      const slots = getGridTargetSlots(packSlots, candidate, card, shape);
+      if (slots.length) placements.push({ slots, shape });
+    });
+  });
+
+  return placements
+    .filter((placement, index, list) => {
+      const key = `${placement.shape}:${placement.slots.join(",")}`;
+      return list.findIndex((candidate) => `${candidate.shape}:${candidate.slots.join(",")}` === key) === index;
+    })
     .sort((a, b) => {
+      if (!preferred) return 0;
+      const aContains = a.slots.includes(preferredSlotId);
+      const bContains = b.slots.includes(preferredSlotId);
+      if (aContains !== bContains) return aContains ? -1 : 1;
+      const aDirect = a.slots[0] === preferredSlotId;
+      const bDirect = b.slots[0] === preferredSlotId;
+      if (aDirect !== bDirect) return aDirect ? -1 : 1;
+      const aBase = a.shape === baseShape;
+      const bBase = b.shape === baseShape;
+      if (aBase !== bBase) return aBase ? -1 : 1;
       const aStart = getSlotInfo(a.slots[0]);
       const bStart = getSlotInfo(b.slots[0]);
-      const aDistance = Math.abs(aStart.row - slot.row) + Math.abs(aStart.col - slot.col);
-      const bDistance = Math.abs(bStart.row - slot.row) + Math.abs(bStart.col - slot.col);
+      const aDistance = Math.abs(aStart.row - preferred.row) + Math.abs(aStart.col - preferred.col);
+      const bDistance = Math.abs(bStart.row - preferred.row) + Math.abs(bStart.col - preferred.col);
       return aDistance - bDistance;
-    })[0] || { slots: [], shape: getSlotShape(card) };
+    });
 }
 
 function getEquipmentTargetSlots(slot, card) {
@@ -1671,14 +1753,14 @@ async function loadDatabasePresets() {
         nextItems.push({
           name,
           kind: getRecordValue(record, ["kind", "屬性", "物品類型", "分類"]) || "物品",
-          icon: getRecordValue(record, ["icon", "圖示", "素材", "圖片"]) || "blank",
+          icon: getLocalItemImage(name) || getRecordValue(record, ["icon", "圖示", "素材", "圖片"]) || "blank",
           usageMax: Number(getRecordValue(record, ["usageMax", "usage", "使用點", "使用次數", "點數"]) || 0),
           damage: getRecordValue(record, ["damage", "骰子", "傷害", "傷害骰"]),
           armor: normalizeArmor(getRecordValue(record, ["armor", "護甲值", "護甲"])),
           slots: Number(getRecordValue(record, ["slots", "占用格數", "格數", "占格"]) || 1),
           slotShape: normalizeSlotShape(getRecordValue(record, ["slotShape", "格子排法", "形狀", "方向", "占用方向"])),
           equipRule: normalizeEquipRule(getRecordValue(record, ["equipRule", "部位限定", "裝備規則", "部位"])),
-          note: getRecordValue(record, ["note", "備註", "效果", "上限"]),
+          note: name === "錢袋" ? "容量：250" : getRecordValue(record, ["note", "備註", "效果", "上限"]),
           category: category || "物品",
         });
       }
@@ -1744,6 +1826,13 @@ function normalizeHeader(value) {
   return String(value || "").trim().replace(/\s+/g, "").toLowerCase();
 }
 
+function getLocalItemImage(name) {
+  const normalizedName = String(name || "").trim();
+  if (!normalizedName) return "";
+  const fileName = normalizedName === "戰鎚" ? "戰錘" : normalizedName;
+  return localItemImageNames.has(normalizedName) ? `assets/items/${fileName}.png` : "";
+}
+
 function normalizeSlotShape(value) {
   const shape = String(value || "").trim().toLowerCase();
   if (["2x1", "橫", "橫向", "horizontal"].includes(shape)) return "2x1";
@@ -1787,6 +1876,8 @@ function splitConditionDetail(detail) {
 
 async function bootstrap() {
   await loadDatabasePresets();
+  normalizeState(state);
+  saveState();
   render();
 }
 
