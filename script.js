@@ -1510,45 +1510,108 @@ function renderSlotFootprint(item) {
   </span>`;
 }
 
+function getCustomItemCategoryOptions(categories) {
+  return unique([...categories, "戰鬥", "物品", "法術"]);
+}
+
+function getCustomItemMode(category) {
+  const text = String(category || "");
+  if (text.includes("法術")) return "spell";
+  if (text.includes("戰鬥") || text.includes("武器") || text.includes("護甲")) return "combat";
+  return "item";
+}
+
+function renderCustomItemFields(category, values = {}) {
+  const mode = getCustomItemMode(category);
+  const usageValue = values.usageMax ?? 3;
+  const slotsValue = String(values.slots || "1");
+  const slotShapeValue = values.slotShape || "";
+  const equipRuleValue = values.equipRule || "any";
+  const noteLabel = mode === "spell" ? "效果" : "備註";
+  const notePlaceholder = mode === "spell" ? "寫下法術效果" : "寫下特殊效果或說明";
+  const kindField = mode === "spell" ? "" : `
+    <label class="field">屬性<input data-kind value="${escapeAttr(values.kind || "")}" placeholder="例如 輕型、光源、消耗"></label>
+  `;
+  const combatFields = mode === "combat" ? `
+    <label class="field">骰子<input data-damage value="${escapeAttr(values.damage || "")}" placeholder="例如 d6 或 d6/d8"></label>
+    <label class="field">護甲值<input data-armor value="${escapeAttr(values.armor || "")}" placeholder="例如 1"></label>
+  ` : "";
+
+  return `
+    ${kindField}
+    <label class="field">使用次數<input data-usage-max type="number" min="0" max="6" value="${escapeAttr(usageValue)}"></label>
+    <label class="field">占用格數<select data-slots>
+      <option value="1" ${slotsValue === "1" ? "selected" : ""}>1 格</option>
+      <option value="2" ${slotsValue === "2" ? "selected" : ""}>2 格</option>
+    </select></label>
+    <label class="field">格子排法<select data-slot-shape>
+      <option value="" ${slotShapeValue === "" ? "selected" : ""}>自動</option>
+      <option value="1x2" ${slotShapeValue === "1x2" ? "selected" : ""}>1x2 直向</option>
+      <option value="2x1" ${slotShapeValue === "2x1" ? "selected" : ""}>2x1 橫向</option>
+    </select></label>
+    <label class="field">部位限定<select data-equip-rule>
+      <option value="any" ${equipRuleValue === "any" ? "selected" : ""}>不限</option>
+      <option value="paw" ${equipRuleValue === "paw" ? "selected" : ""}>爪</option>
+      <option value="twoPaws" ${equipRuleValue === "twoPaws" ? "selected" : ""}>兩爪</option>
+      <option value="body" ${equipRuleValue === "body" ? "selected" : ""}>身體</option>
+      <option value="bodyPaw" ${equipRuleValue === "bodyPaw" ? "selected" : ""}>身體+爪</option>
+    </select></label>
+    ${combatFields}
+    <label class="field">${noteLabel}<textarea data-note rows="3" placeholder="${escapeAttr(notePlaceholder)}">${escapeHtml(values.note || "")}</textarea></label>
+  `;
+}
+
+function readCustomItemDraft(modal) {
+  const value = (selector) => modal.querySelector(selector)?.value || "";
+  return {
+    name: value("[data-name]") || "新物品",
+    category: value("[data-category]") || "物品",
+    kind: value("[data-kind]"),
+    usageMax: value("[data-usage-max]") || 0,
+    slots: value("[data-slots]") || 1,
+    slotShape: value("[data-slot-shape]"),
+    equipRule: value("[data-equip-rule]") || "any",
+    damage: value("[data-damage]"),
+    armor: value("[data-armor]"),
+    note: value("[data-note]"),
+  };
+}
+
 function openCustomItemModal(slotId) {
-  const categories = getItemCategories();
+  const categoryOptions = getCustomItemCategoryOptions(getItemCategories());
+  const initialCategory = categoryOptions.includes("物品") ? "物品" : categoryOptions[0];
   openModal("自訂物品", `
     <div class="form-grid">
       <label class="field">名稱<input data-name value="新物品"></label>
       <label class="field">類別<select data-category>
-        ${unique([...categories, "戰鬥", "物品", "法術"]).map((category) => `<option value="${escapeAttr(category)}">${escapeHtml(category)}</option>`).join("")}
+        ${categoryOptions.map((category) => `<option value="${escapeAttr(category)}" ${category === initialCategory ? "selected" : ""}>${escapeHtml(category)}</option>`).join("")}
       </select></label>
-      <label class="field">屬性<input data-kind placeholder="例如 輕型、重型遠程、彈藥"></label>
-      <label class="field">usage<input data-usage-max type="number" min="0" max="6" value="3"></label>
-      <label class="field">占用格數<select data-slots><option value="1">1 格</option><option value="2">2 格</option></select></label>
-      <label class="field">格子排法<select data-slot-shape><option value="">自動</option><option value="1x2">1x2 直向</option><option value="2x1">2x1 橫向</option></select></label>
-      <label class="field">部位限定<select data-equip-rule>
-        <option value="any">不限</option>
-        <option value="paw">爪</option>
-        <option value="twoPaws">兩爪</option>
-        <option value="body">身體</option>
-        <option value="bodyPaw">身體+爪</option>
-      </select></label>
-      <label class="field">骰子<input data-damage placeholder="例如 d6 或 d6/d8"></label>
-      <label class="field">護甲值<input data-armor placeholder="例如 1"></label>
-      <label class="field">效果<textarea data-note rows="3"></textarea></label>
+    </div>
+    <div class="form-grid" data-custom-fields>
+      ${renderCustomItemFields(initialCategory)}
     </div>
     <div class="actions"><button class="primary" data-save>新增</button></div>
   `, (modal, close) => {
+    modal.querySelector("[data-category]").addEventListener("change", () => {
+      const values = readCustomItemDraft(modal);
+      modal.querySelector("[data-custom-fields]").innerHTML = renderCustomItemFields(values.category, values);
+    });
     modal.querySelector("[data-save]").addEventListener("click", () => {
+      const values = readCustomItemDraft(modal);
+      const mode = getCustomItemMode(values.category);
       updateCharacter((character) => {
         placeCardWithAutoArrange(character, slotId, makeItem({
-          name: modal.querySelector("[data-name]").value,
-          kind: modal.querySelector("[data-kind]").value,
+          name: values.name,
+          kind: mode === "spell" ? "法術" : values.kind,
           icon: "blank",
-          usageMax: modal.querySelector("[data-usage-max]").value,
-          slots: modal.querySelector("[data-slots]").value,
-          slotShape: normalizeSlotShape(modal.querySelector("[data-slot-shape]").value),
-          equipRule: normalizeEquipRule(modal.querySelector("[data-equip-rule]").value),
-          damage: modal.querySelector("[data-damage]").value,
-          armor: normalizeArmor(modal.querySelector("[data-armor]").value),
-          note: modal.querySelector("[data-note]").value,
-          category: modal.querySelector("[data-category]").value,
+          usageMax: values.usageMax,
+          slots: values.slots,
+          slotShape: normalizeSlotShape(values.slotShape),
+          equipRule: normalizeEquipRule(values.equipRule),
+          damage: mode === "combat" ? values.damage : "",
+          armor: mode === "combat" ? normalizeArmor(values.armor) : "",
+          note: values.note,
+          category: values.category,
         }));
       });
       close();
