@@ -42,6 +42,46 @@ const conditionPresets = [
   { name: "枯竭", detail: "意志檢定時擁有劣勢；移除：完全休息之後" },
 ];
 
+const mouseBackgrounds = [
+  [{ background: "測試對象", items: ["魔法飛彈", "重甲"] }, { background: "廚房覓食者", items: ["輕甲", "炊具"] }, { background: "籠居者", items: ["被理解", "牛奶瓶"] }, { background: "籬笆女巫", items: ["治療術", "香枝"] }, { background: "皮革工", items: ["輕甲", "大剪刀"] }, { background: "街頭硬漢", items: ["匕首", "咖啡壺"] }],
+  [{ background: "托缽祭司", items: ["復原術", "聖徽"] }, { background: "甲蟲牧者", items: ["忠心甲蟲隨從", "6吋長桿"] }, { background: "麥酒釀造者", items: ["醉酒火炬手隨從", "小麥酒桶"] }, { background: "漁鼠", items: ["網", "針"] }, { background: "鐵匠", items: ["錘", "金屬銼刀"] }, { background: "鐵絲工", items: ["鐵絲卷", "電提燈"] }],
+  [{ background: "伐木工", items: ["斧", "麻繩卷"] }, { background: "蝙蝠教徒", items: ["黑暗術", "蝙蝠牙袋"] }, { background: "錫礦工", items: ["十字鎬", "提燈"] }, { background: "垃圾收集者", items: ["長鉤", "鏡子"] }, { background: "牆上漫遊者", items: ["魚鉤", "線軸"] }, { background: "商人", items: ["負重老鼠隨從", "20p 借據"] }],
+  [{ background: "木筏船員", items: ["錘", "木樁"] }, { background: "蠕蟲牧者", items: ["6吋長桿", "肥皂"] }, { background: "麻雀騎手", items: ["魚鉤", "護目鏡"] }, { background: "下水道嚮導", items: ["金屬銼刀", "線軸"] }, { background: "監獄守衛", items: ["6吋鎖鏈", "長矛"] }, { background: "真菌農夫", items: ["乾蘑菇", "孢子面罩"] }],
+  [{ background: "築壩工", items: ["鏟子", "木樁"] }, { background: "製圖師", items: ["羽毛筆與墨水", "羅盤"] }, { background: "陷阱盜賊", items: ["乳酪塊", "膠水"] }, { background: "流浪者", items: ["帳篷", "可疑藏寶圖"] }, { background: "穀物農夫", items: ["長矛", "哨子"] }, { background: "信使", items: ["睡袋", "密封文件"] }],
+  [{ background: "吟遊鼠", items: ["樂器", "變裝工具"] }, { background: "賭徒", items: ["灌鉛骰子", "鏡子"] }, { background: "樹液採集者", items: ["水桶", "木樁"] }, { background: "養蜂人", items: ["蜂蜜罐", "網"] }, { background: "圖書館員", items: ["冷門書頁", "羽毛筆與墨水"] }, { background: "窮貴族鼠", items: ["氈帽", "香水"] }],
+];
+
+const birthsigns = [
+  { sign: "星", disposition: "勇敢 / 魯莽" },
+  { sign: "輪", disposition: "勤奮 / 缺乏想像力" },
+  { sign: "橡實", disposition: "好奇 / 固執" },
+  { sign: "風暴", disposition: "慷慨 / 易怒" },
+  { sign: "月", disposition: "睿智 / 神秘" },
+  { sign: "母親", disposition: "照顧人 / 憂心" },
+];
+
+const coatColors = ["巧克力色", "黑色", "白色", "棕褐色", "灰色", "藍色"];
+const coatPatterns = ["純色", "虎斑", "斑塊", "環紋", "大理石紋", "斑點"];
+const physicalDetails = [
+  ["滿身傷疤", "肥胖身形", "骨瘦如柴", "纖長身形", "嬌小身形", "巨大身形"],
+  ["戰繪", "異鄉服飾", "優雅服飾", "補丁衣物", "時髦衣物", "髒亂衣物"],
+  ["缺耳", "臉部腫塊", "漂亮臉龐", "圓臉", "精緻臉龐", "長臉"],
+  ["梳理整齊的毛", "髒辮", "染色毛皮", "剃毛", "捲翹毛", "絲滑毛"],
+  ["夜黑眼睛", "眼罩", "血紅眼睛", "睿智眼睛", "銳利眼睛", "發光眼睛"],
+  ["短尾", "鞭狀尾", "簇狀尾", "粗短尾", "靈活尾", "捲曲尾"],
+];
+
+const startingWeapons = ["針", "匕首", "斧", "劍", "錘", "投石索", "長矛", "弓"];
+
+const startingItemOverrides = {
+  十字鎬: { kind: "中型", damage: "d6/d8", category: "戰鬥", equipRule: "paw" },
+  乾蘑菇: { kind: "口糧", category: "物品" },
+  "忠心甲蟲隨從": { kind: "隨從", category: "物品", note: "背景隨從" },
+  "醉酒火炬手隨從": { kind: "隨從", category: "物品", note: "背景隨從" },
+  負重老鼠隨從: { kind: "隨從", category: "物品", note: "背景隨從" },
+  "20p 借據": { kind: "文件", category: "物品", usageMax: 0 },
+};
+
 let state = loadState();
 let longPressTimer = null;
 let activeDrag = null;
@@ -56,6 +96,21 @@ function uid() {
   return Math.random().toString(36).slice(2, 10);
 }
 
+function rollDie(sides) {
+  return Math.floor(Math.random() * sides) + 1;
+}
+
+function rollAttribute() {
+  return Array.from({ length: 3 }, () => rollDie(6))
+    .sort((a, b) => b - a)
+    .slice(0, 2)
+    .reduce((sum, value) => sum + value, 0);
+}
+
+function rollD66() {
+  return [rollDie(6), rollDie(6)];
+}
+
 function makeItem(data) {
   return {
     id: uid(),
@@ -63,7 +118,7 @@ function makeItem(data) {
     name: data.name || "新物品",
     kind: data.kind || "物品",
     icon: data.icon || "□",
-    usageMax: Number(data.usageMax || 3),
+    usageMax: Number(data.usageMax ?? 3),
     usage: Number(data.usage || 0),
     damage: data.damage || "",
     armor: data.armor || "",
@@ -88,6 +143,115 @@ function makeCondition(data) {
     usageMax: 0,
     usage: 0,
   };
+}
+
+function generateMausritterCharacterDraft() {
+  const hpRoll = rollDie(6);
+  const pipsRoll = rollDie(6);
+  const bonusRoll = { hp: rollDie(6), pips: rollDie(6) };
+  const stats = {
+    str: rollAttribute(),
+    dex: rollAttribute(),
+    wil: rollAttribute(),
+  };
+  const highestAttribute = Math.max(stats.str, stats.dex, stats.wil);
+  const background = getMouseBackground(hpRoll, pipsRoll);
+  const bonusBackground = getMouseBackground(bonusRoll.hp, bonusRoll.pips);
+  const [birthsignRoll] = rollD66();
+  const [coatColorRoll] = rollD66();
+  const [coatPatternRoll] = rollD66();
+  const [detailTens, detailOnes] = rollD66();
+  const bonusItems = highestAttribute <= 7
+    ? bonusBackground.items
+    : highestAttribute <= 9
+      ? [bonusBackground.items[rollDie(2) - 1]]
+      : [];
+
+  return {
+    stats,
+    hp: hpRoll,
+    pips: pipsRoll,
+    highestAttribute,
+    background,
+    bonusBackground,
+    bonusItems,
+    birthsign: birthsigns[birthsignRoll - 1],
+    coat: `${coatColors[coatColorRoll - 1]}、${coatPatterns[coatPatternRoll - 1]}`,
+    look: physicalDetails[detailTens - 1][detailOnes - 1],
+  };
+}
+
+function getMouseBackground(hp, pips) {
+  return mouseBackgrounds[clamp(hp, 1, 6) - 1][clamp(pips, 1, 6) - 1];
+}
+
+function createMausritterCharacter(draft, weaponName) {
+  const character = makeCharacter("新老鼠");
+  Object.keys(character.slots).forEach((slotId) => { character.slots[slotId] = null; });
+  character.origin = draft.background.background;
+  character.stats.str.max = draft.stats.str;
+  character.stats.str.current = draft.stats.str;
+  character.stats.dex.max = draft.stats.dex;
+  character.stats.dex.current = draft.stats.dex;
+  character.stats.wil.max = draft.stats.wil;
+  character.stats.wil.current = draft.stats.wil;
+  character.hp.max = draft.hp;
+  character.hp.current = draft.hp;
+  character.money = draft.pips;
+  character.level = 1;
+  character.xp = 0;
+  character.grit = [];
+
+  const startingItems = ["火炬", "口糧", ...draft.background.items, weaponName, ...draft.bonusItems];
+  const missingItems = [];
+  startingItems.forEach((itemName) => addStartingItem(character, itemName, missingItems));
+  character.notes = [
+    `星座：${draft.birthsign.sign}（${draft.birthsign.disposition}）`,
+    `毛色：${draft.coat}`,
+    `外觀：${draft.look}`,
+    `起始擲骰：HP ${draft.hp}，金錢 ${draft.pips}，背景 ${draft.background.background}`,
+    draft.bonusItems.length ? `低屬性補償：${draft.bonusBackground.background}：${draft.bonusItems.join("、")}` : "",
+    missingItems.length ? `未放入物品：${missingItems.join("、")}` : "",
+  ].filter(Boolean).join("\n");
+  return character;
+}
+
+function addStartingItem(character, itemName, missingItems) {
+  const card = makeStartingItem(itemName);
+  const candidates = getStartingSlotCandidates(card);
+  const placed = candidates.some((slotId) => {
+    if (slotId.startsWith("pack")) return placeCardWithAutoArrange(character, slotId, card);
+    return placeCard(character, slotId, card);
+  });
+  if (!placed) missingItems.push(itemName);
+}
+
+function makeStartingItem(itemName) {
+  const override = startingItemOverrides[itemName] || {};
+  const preset = itemPresets.find((item) => item.name === (override.preset || itemName));
+  if (preset) return makeItem({ ...preset, name: override.name || preset.name, note: override.note || preset.note });
+  return makeItem({
+    name: itemName,
+    kind: override.kind || "物品",
+    icon: getLocalItemImage(itemName) || "blank",
+    usageMax: override.usageMax ?? 3,
+    damage: override.damage || "",
+    armor: normalizeArmor(override.armor || ""),
+    slots: override.slots || 1,
+    slotShape: normalizeSlotShape(override.slotShape || ""),
+    equipRule: normalizeEquipRule(override.equipRule || "any"),
+    category: override.category || "物品",
+    note: override.note || "",
+  });
+}
+
+function getStartingSlotCandidates(card) {
+  const packIds = packSlots.map((slot) => slot.id);
+  const equipIds = equipSlots.map((slot) => slot.id);
+  if (["火炬", "口糧"].includes(card.name)) return [...packIds, ...equipIds];
+  if (card.armor || ["body", "bodyPaw"].includes(getEquipRule(card))) return ["bodyA", "bodyB", "mainPaw", "offPaw", ...packIds];
+  if (card.damage || ["paw", "twoPaws"].includes(getEquipRule(card))) return ["mainPaw", "offPaw", ...packIds];
+  return [...packIds, ...equipIds];
 }
 
 function makeCharacter(name = "柳葉") {
@@ -462,7 +626,10 @@ function bindEvents() {
     });
   });
 
-  app.querySelector("[data-action='settings']").addEventListener("click", openSettings);
+  app.querySelector("[data-action='settings']").addEventListener("click", (event) => {
+    event.stopPropagation();
+    openSettings();
+  });
 
   app.querySelector("[data-action='portrait']").addEventListener("change", (event) => {
     const file = event.target.files?.[0];
@@ -478,7 +645,7 @@ function bindEvents() {
 
   app.querySelector("[data-action='money-sheet']").addEventListener("click", openMoneySheet);
 
-  bindLongPress(app.querySelector("[data-long='identity']"), () => openIdentityModal());
+  app.querySelector("[data-long='identity']").addEventListener("click", openIdentityModal);
   app.querySelectorAll("[data-long='statMax']").forEach((button) => {
     button.addEventListener("click", () => {
       const key = button.dataset.stat;
@@ -1020,6 +1187,47 @@ function canPlaceCardWithAutoArrange(character, slotId, card) {
   return placeCardWithAutoArrange(testCharacter, slotId, { ...card });
 }
 
+function placeNewCard(character, slotId, card) {
+  const candidates = getNewCardCandidateSlots(slotId, card);
+  for (const candidateSlotId of candidates) {
+    const snapshot = cloneSlots(character.slots);
+    if (placeCardWithAutoArrange(character, candidateSlotId, card)) return true;
+    character.slots = snapshot;
+  }
+  return false;
+}
+
+function canPlaceNewCard(character, slotId, card) {
+  const testCharacter = { ...character, slots: cloneSlots(character.slots) };
+  return placeNewCard(testCharacter, slotId, { ...card });
+}
+
+function getNewCardCandidateSlots(slotId, card) {
+  const slot = getSlotInfo(slotId);
+  const pageSlots = slot?.region === "pack" ? packSlots : equipSlots;
+  const containingStarts = pageSlots
+    .filter((candidate) => getTargetSlots(candidate.id, card).includes(slotId))
+    .map((candidate) => candidate.id);
+  return unique([
+    slotId,
+    ...containingStarts,
+    ...pageSlots.map((candidate) => candidate.id),
+    ...packSlots.map((candidate) => candidate.id),
+  ]).filter((candidateSlotId) => getTargetSlots(candidateSlotId, card).length);
+}
+
+function addNewCardToSlot(slotId, card, close) {
+  if (!canPlaceNewCard(activeCharacter(), slotId, card)) {
+    showToast("這張卡片目前沒有足夠或合法的位置");
+    return false;
+  }
+  updateCharacter((character) => {
+    placeNewCard(character, slotId, card);
+  });
+  close();
+  return true;
+}
+
 function areSlotsAvailable(character, slotIds) {
   return slotIds.every((slotId) => slotId && !character.slots[slotId]);
 }
@@ -1447,10 +1655,7 @@ function openItemModal(slotId) {
       modal.querySelectorAll("[data-pick-item]").forEach((button) => {
         button.addEventListener("click", () => {
           const item = itemPresets[Number(button.dataset.pickItem)];
-          updateCharacter((character) => {
-            placeCardWithAutoArrange(character, slotId, makeItem(item));
-          });
-          close();
+          addNewCardToSlot(slotId, makeItem(item), close);
         });
       });
     };
@@ -1486,7 +1691,7 @@ function renderCatalogList(category, slotId, character) {
 }
 
 function renderCatalogButton(item, index, slotId, character) {
-  const disabled = canPlaceCardWithAutoArrange(character, slotId, { ...item, slots: Number(item.slots || 1) }) ? "" : "disabled";
+  const disabled = canPlaceNewCard(character, slotId, { ...item, slots: Number(item.slots || 1) }) ? "" : "disabled";
   const disabledText = disabled ? " · 目前放不下" : "";
   const category = getItemCategory(item);
   const shouldShowMeta = !["物品", "法術"].includes(category);
@@ -1524,30 +1729,21 @@ function getCustomItemMode(category) {
 function renderCustomItemFields(category, values = {}) {
   const mode = getCustomItemMode(category);
   const usageValue = values.usageMax ?? 3;
-  const slotsValue = String(values.slots || "1");
-  const slotShapeValue = values.slotShape || "";
+  const footprintValue = values.footprint || getCustomItemFootprintValue(values);
   const equipRuleValue = values.equipRule || "any";
   const noteLabel = mode === "spell" ? "效果" : "備註";
   const notePlaceholder = mode === "spell" ? "寫下法術效果" : "寫下特殊效果或說明";
-  const kindField = mode === "spell" ? "" : `
-    <label class="field">屬性<input data-kind value="${escapeAttr(values.kind || "")}" placeholder="例如 輕型、光源、消耗"></label>
-  `;
   const combatFields = mode === "combat" ? `
     <label class="field">骰子<input data-damage value="${escapeAttr(values.damage || "")}" placeholder="例如 d6 或 d6/d8"></label>
     <label class="field">護甲值<input data-armor value="${escapeAttr(values.armor || "")}" placeholder="例如 1"></label>
   ` : "";
 
   return `
-    ${kindField}
     <label class="field">使用次數<input data-usage-max type="number" min="0" max="6" value="${escapeAttr(usageValue)}"></label>
-    <label class="field">占用格數<select data-slots>
-      <option value="1" ${slotsValue === "1" ? "selected" : ""}>1 格</option>
-      <option value="2" ${slotsValue === "2" ? "selected" : ""}>2 格</option>
-    </select></label>
-    <label class="field">格子排法<select data-slot-shape>
-      <option value="" ${slotShapeValue === "" ? "selected" : ""}>自動</option>
-      <option value="1x2" ${slotShapeValue === "1x2" ? "selected" : ""}>1x2 直向</option>
-      <option value="2x1" ${slotShapeValue === "2x1" ? "selected" : ""}>2x1 橫向</option>
+    <label class="field">占用格數<select data-footprint>
+      <option value="1x1" ${footprintValue === "1x1" ? "selected" : ""}>1格</option>
+      <option value="2x1" ${footprintValue === "2x1" ? "selected" : ""}>2格(橫)</option>
+      <option value="1x2" ${footprintValue === "1x2" ? "selected" : ""}>2格(直)</option>
     </select></label>
     <label class="field">部位限定<select data-equip-rule>
       <option value="any" ${equipRuleValue === "any" ? "selected" : ""}>不限</option>
@@ -1561,15 +1757,30 @@ function renderCustomItemFields(category, values = {}) {
   `;
 }
 
+function getCustomItemFootprintValue(values = {}) {
+  if (values.footprint) return values.footprint;
+  if (Number(values.slots || 1) !== 2) return "1x1";
+  return normalizeSlotShape(values.slotShape) || "1x2";
+}
+
+function parseCustomItemFootprint(value) {
+  const footprint = value || "1x1";
+  return {
+    slots: footprint === "1x1" ? 1 : 2,
+    slotShape: footprint === "1x1" ? "1x1" : footprint,
+  };
+}
+
 function readCustomItemDraft(modal) {
   const value = (selector) => modal.querySelector(selector)?.value || "";
+  const footprint = parseCustomItemFootprint(value("[data-footprint]"));
   return {
     name: value("[data-name]") || "新物品",
     category: value("[data-category]") || "物品",
-    kind: value("[data-kind]"),
     usageMax: value("[data-usage-max]") || 0,
-    slots: value("[data-slots]") || 1,
-    slotShape: value("[data-slot-shape]"),
+    footprint: value("[data-footprint]") || "1x1",
+    slots: footprint.slots,
+    slotShape: footprint.slotShape,
     equipRule: value("[data-equip-rule]") || "any",
     damage: value("[data-damage]"),
     armor: value("[data-armor]"),
@@ -1580,6 +1791,10 @@ function readCustomItemDraft(modal) {
 function openCustomItemModal(slotId) {
   const categoryOptions = getCustomItemCategoryOptions(getItemCategories());
   const initialCategory = categoryOptions.includes("物品") ? "物品" : categoryOptions[0];
+  const rerenderFields = (modal) => {
+    const values = readCustomItemDraft(modal);
+    modal.querySelector("[data-custom-fields]").innerHTML = renderCustomItemFields(values.category, values);
+  };
   openModal("自訂物品", `
     <div class="form-grid">
       <label class="field">名稱<input data-name value="新物品"></label>
@@ -1592,29 +1807,23 @@ function openCustomItemModal(slotId) {
     </div>
     <div class="actions"><button class="primary" data-save>新增</button></div>
   `, (modal, close) => {
-    modal.querySelector("[data-category]").addEventListener("change", () => {
-      const values = readCustomItemDraft(modal);
-      modal.querySelector("[data-custom-fields]").innerHTML = renderCustomItemFields(values.category, values);
-    });
+    modal.querySelector("[data-category]").addEventListener("change", () => rerenderFields(modal));
     modal.querySelector("[data-save]").addEventListener("click", () => {
       const values = readCustomItemDraft(modal);
       const mode = getCustomItemMode(values.category);
-      updateCharacter((character) => {
-        placeCardWithAutoArrange(character, slotId, makeItem({
-          name: values.name,
-          kind: mode === "spell" ? "法術" : values.kind,
-          icon: "blank",
-          usageMax: values.usageMax,
-          slots: values.slots,
-          slotShape: normalizeSlotShape(values.slotShape),
-          equipRule: normalizeEquipRule(values.equipRule),
-          damage: mode === "combat" ? values.damage : "",
-          armor: mode === "combat" ? normalizeArmor(values.armor) : "",
-          note: values.note,
-          category: values.category,
-        }));
-      });
-      close();
+      addNewCardToSlot(slotId, makeItem({
+        name: values.name,
+        kind: mode === "spell" ? "法術" : values.category,
+        icon: "blank",
+        usageMax: values.usageMax,
+        slots: values.slots,
+        slotShape: normalizeSlotShape(values.slotShape),
+        equipRule: normalizeEquipRule(values.equipRule),
+        damage: mode === "combat" ? values.damage : "",
+        armor: mode === "combat" ? normalizeArmor(values.armor) : "",
+        note: values.note,
+        category: values.category,
+      }), close);
     });
   });
 }
@@ -1688,6 +1897,46 @@ function openSettings() {
   });
 }
 
+function openNewCharacterModal(draft = generateMausritterCharacterDraft()) {
+  openModal("新增角色", `
+    <div class="card-effect">
+      <strong>規則擲骰結果</strong><br>
+      力量 ${draft.stats.str}、敏捷 ${draft.stats.dex}、意志 ${draft.stats.wil}<br>
+      HP ${draft.hp}、金錢 ${draft.pips}<br>
+      出身：${escapeHtml(draft.background.background)}<br>
+      背景物品：${draft.background.items.map(escapeHtml).join("、")}<br>
+      ${draft.bonusItems.length ? `低屬性補償：${escapeHtml(draft.bonusBackground.background)}：${draft.bonusItems.map(escapeHtml).join("、")}<br>` : ""}
+      星座：${escapeHtml(draft.birthsign.sign)}（${escapeHtml(draft.birthsign.disposition)}）<br>
+      毛色：${escapeHtml(draft.coat)}<br>
+      外觀：${escapeHtml(draft.look)}
+    </div>
+    <div class="form-grid">
+      <label class="field">起始武器<select data-starting-weapon>
+        ${startingWeapons.map((weapon) => `<option value="${escapeAttr(weapon)}">${escapeHtml(weapon)}</option>`).join("")}
+      </select></label>
+    </div>
+    <div class="actions">
+      <button class="secondary" data-reroll>重新擲骰</button>
+      <button class="primary" data-create>建立角色</button>
+    </div>
+  `, (modal, close) => {
+    addModalBack(modal, close, openCharactersModal);
+    modal.querySelector("[data-reroll]").addEventListener("click", () => {
+      close();
+      openNewCharacterModal(generateMausritterCharacterDraft());
+    });
+    modal.querySelector("[data-create]").addEventListener("click", () => {
+      const character = createMausritterCharacter(draft, modal.querySelector("[data-starting-weapon]").value);
+      state.characters.push(character);
+      state.activeCharacterId = character.id;
+      state.activePage = "equipment";
+      saveState();
+      close();
+      render();
+    });
+  });
+}
+
 function openCharactersModal() {
   const current = activeCharacter();
   openModal("選擇角色", `
@@ -1724,12 +1973,8 @@ function openCharactersModal() {
       });
     });
     modal.querySelector("[data-new]").addEventListener("click", () => {
-      const character = makeCharacter("新老鼠");
-      state.characters.push(character);
-      state.activeCharacterId = character.id;
-      saveState();
       close();
-      render();
+      openNewCharacterModal();
     });
     modal.querySelector("[data-import]").addEventListener("click", () => {
       close();
